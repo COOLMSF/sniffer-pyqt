@@ -1,0 +1,348 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1244</width>
+    <height>890</height>
+   </rect>
+  </property>
+  <property name="contextMenuPolicy">
+   <enum>Qt::DefaultContextMenu</enum>
+  </property>
+  <property name="windowTitle">
+   <string>Sniffer</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QGridLayout" name="gridLayout">
+    <item row="2" column="0">
+     <widget class="QGroupBox" name="groupBox">
+      <property name="title">
+       <string>网络攻击过滤器</string>
+      </property>
+      <widget class="QCheckBox" name="checkBoxDDOS">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>20</y>
+         <width>90</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>DDOS</string>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="checkBoxUser">
+       <property name="geometry">
+        <rect>
+         <x>100</x>
+         <y>20</y>
+         <width>90</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>用户名</string>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="checkBoxScanAttack">
+       <property name="geometry">
+        <rect>
+         <x>290</x>
+         <y>20</y>
+         <width>90</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>扫描攻击</string>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="checkBoxForkBoom">
+       <property name="geometry">
+        <rect>
+         <x>390</x>
+         <y>20</y>
+         <width>90</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Fork boom</string>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="checkBoxCredit">
+       <property name="geometry">
+        <rect>
+         <x>190</x>
+         <y>20</y>
+         <width>90</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>银行卡</string>
+       </property>
+      </widget>
+     </widget>
+    </item>
+    <item row="3" column="0">
+     <widget class="QTreeWidget" name="treeWidget">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>3</horstretch>
+        <verstretch>2</verstretch>
+       </sizepolicy>
+      </property>
+      <column>
+       <property name="text">
+        <string notr="true">1</string>
+       </property>
+      </column>
+     </widget>
+    </item>
+    <item row="4" column="0" colspan="2">
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <widget class="QTextBrowser" name="textBrowserDump">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+          <horstretch>2</horstretch>
+          <verstretch>2</verstretch>
+         </sizepolicy>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item row="4" column="2">
+     <widget class="QTextBrowser" name="textBrowserRaw">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>3</horstretch>
+        <verstretch>2</verstretch>
+       </sizepolicy>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="1" colspan="2">
+     <widget class="QTableWidget" name="tableWidgetAttackInfo">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>3</verstretch>
+       </sizepolicy>
+      </property>
+      <column>
+       <property name="text">
+        <string>序号</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>源地址</string>
+       </property>
+       <property name="textAlignment">
+        <set>AlignCenter</set>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>目的地址</string>
+       </property>
+       <property name="textAlignment">
+        <set>AlignCenter</set>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>网络攻击分类</string>
+       </property>
+       <property name="textAlignment">
+        <set>AlignCenter</set>
+       </property>
+      </column>
+     </widget>
+    </item>
+    <item row="0" column="0" colspan="3">
+     <widget class="QTableWidget" name="tableWidget">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>3</verstretch>
+       </sizepolicy>
+      </property>
+      <column>
+       <property name="text">
+        <string>序号</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>时间</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>源地址</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>目的地址</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>协议</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>长度</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>信息</string>
+       </property>
+      </column>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1244</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuasd">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="separator"/>
+    <addaction name="actionOpen_pcap"/>
+    <addaction name="actionSave_pcap"/>
+    <addaction name="actionExit"/>
+   </widget>
+   <widget class="QMenu" name="menuCapture">
+    <property name="title">
+     <string>Capture</string>
+    </property>
+    <addaction name="separator"/>
+    <addaction name="actionFrom_file"/>
+    <addaction name="actionFrom_interface"/>
+    <addaction name="actionFilter"/>
+   </widget>
+   <widget class="QMenu" name="menuAnalyze">
+    <property name="title">
+     <string>Analyze</string>
+    </property>
+    <addaction name="actionStatic"/>
+   </widget>
+   <widget class="QMenu" name="menuHack">
+    <property name="title">
+     <string>Hack</string>
+    </property>
+    <widget class="QMenu" name="menuScan">
+     <property name="title">
+      <string>Scan</string>
+     </property>
+     <addaction name="actionNmap"/>
+    </widget>
+    <addaction name="actionDDOS"/>
+    <addaction name="actionUnencrypted_infomation"/>
+    <addaction name="menuScan"/>
+    <addaction name="actionFork_bomb"/>
+   </widget>
+   <widget class="QMenu" name="menuAbout">
+    <property name="title">
+     <string>About</string>
+    </property>
+   </widget>
+   <addaction name="menuasd"/>
+   <addaction name="menuCapture"/>
+   <addaction name="menuAnalyze"/>
+   <addaction name="menuHack"/>
+   <addaction name="menuAbout"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <widget class="QToolBar" name="toolBar">
+   <property name="windowTitle">
+    <string>toolBar</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="separator"/>
+  </widget>
+  <action name="actionOpen_pcap">
+   <property name="text">
+    <string>Open pcap</string>
+   </property>
+  </action>
+  <action name="actionSave_pcap">
+   <property name="text">
+    <string>Save pcap</string>
+   </property>
+  </action>
+  <action name="actionExit">
+   <property name="text">
+    <string>Exit</string>
+   </property>
+  </action>
+  <action name="actionFrom_file">
+   <property name="text">
+    <string>From file</string>
+   </property>
+  </action>
+  <action name="actionFrom_interface">
+   <property name="text">
+    <string>From interface</string>
+   </property>
+  </action>
+  <action name="actionFilter">
+   <property name="text">
+    <string>Filter</string>
+   </property>
+  </action>
+  <action name="actionStatic">
+   <property name="text">
+    <string>Static</string>
+   </property>
+  </action>
+  <action name="actionDDOS">
+   <property name="text">
+    <string>DDOS</string>
+   </property>
+  </action>
+  <action name="actionUnencrypted_infomation">
+   <property name="text">
+    <string>Unencrypted infomation</string>
+   </property>
+  </action>
+  <action name="actionFork_bomb">
+   <property name="text">
+    <string>Fork bomb</string>
+   </property>
+  </action>
+  <action name="actionNmap">
+   <property name="text">
+    <string>Nmap</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
