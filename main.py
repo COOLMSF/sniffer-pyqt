@@ -250,7 +250,7 @@ def user_pass_check(raw_packet):
 
     # print("user pass fun called")
     data = raw_packet.rawData.splitlines()
-    print(data)
+    # print(data)
     # print(packet[Raw].load.decode('utf-8','ignore'))
     for line in data:
         # for user_keyword in USER_KEYWORDS:
@@ -452,6 +452,8 @@ class SnifferMainWindow(Ui_MainWindow,QtWidgets.QMainWindow):
         self.checkBoxForkBoom.stateChanged.connect(self.choose)
         self.checkBoxScanAttack.stateChanged.connect(self.choose)
         self.checkBoxUser.stateChanged.connect(self.choose)
+        self.checkBoxTxtFilename.stateChanged.connect(self.choose)
+        self.checkBoxPicFilename.stateChanged.connect(self.choose)
 
 
 
