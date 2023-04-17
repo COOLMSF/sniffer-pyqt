@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1244</width>
+    <width>1523</width>
     <height>890</height>
    </rect>
   </property>
@@ -17,211 +17,293 @@
    <string>Sniffer</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QGridLayout" name="gridLayout">
-    <item row="2" column="0">
-     <widget class="QGroupBox" name="groupBox">
-      <property name="title">
-       <string>网络攻击过滤器</string>
-      </property>
-      <widget class="QCheckBox" name="checkBoxDDOS">
-       <property name="geometry">
-        <rect>
-         <x>0</x>
-         <y>20</y>
-         <width>90</width>
-         <height>23</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>DDOS</string>
-       </property>
-      </widget>
-      <widget class="QCheckBox" name="checkBoxUser">
-       <property name="geometry">
-        <rect>
-         <x>100</x>
-         <y>20</y>
-         <width>90</width>
-         <height>23</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>用户名</string>
-       </property>
-      </widget>
-      <widget class="QCheckBox" name="checkBoxScanAttack">
-       <property name="geometry">
-        <rect>
-         <x>290</x>
-         <y>20</y>
-         <width>90</width>
-         <height>23</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>扫描攻击</string>
-       </property>
-      </widget>
-      <widget class="QCheckBox" name="checkBoxForkBoom">
-       <property name="geometry">
-        <rect>
-         <x>390</x>
-         <y>20</y>
-         <width>90</width>
-         <height>23</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Fork boom</string>
-       </property>
-      </widget>
-      <widget class="QCheckBox" name="checkBoxCredit">
-       <property name="geometry">
-        <rect>
-         <x>190</x>
-         <y>20</y>
-         <width>90</width>
-         <height>23</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>银行卡</string>
-       </property>
-      </widget>
-     </widget>
-    </item>
-    <item row="3" column="0">
-     <widget class="QTreeWidget" name="treeWidget">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-        <horstretch>3</horstretch>
-        <verstretch>2</verstretch>
-       </sizepolicy>
-      </property>
-      <column>
-       <property name="text">
-        <string notr="true">1</string>
-       </property>
-      </column>
-     </widget>
-    </item>
-    <item row="4" column="0" colspan="2">
-     <layout class="QHBoxLayout" name="horizontalLayout">
-      <item>
-       <widget class="QTextBrowser" name="textBrowserDump">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-          <horstretch>2</horstretch>
-          <verstretch>2</verstretch>
-         </sizepolicy>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </item>
-    <item row="4" column="2">
-     <widget class="QTextBrowser" name="textBrowserRaw">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-        <horstretch>3</horstretch>
-        <verstretch>2</verstretch>
-       </sizepolicy>
-      </property>
-     </widget>
-    </item>
-    <item row="3" column="1" colspan="2">
-     <widget class="QTableWidget" name="tableWidgetAttackInfo">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-        <horstretch>0</horstretch>
-        <verstretch>3</verstretch>
-       </sizepolicy>
-      </property>
-      <column>
-       <property name="text">
-        <string>序号</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>源地址</string>
-       </property>
-       <property name="textAlignment">
-        <set>AlignCenter</set>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>目的地址</string>
-       </property>
-       <property name="textAlignment">
-        <set>AlignCenter</set>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>网络攻击分类</string>
-       </property>
-       <property name="textAlignment">
-        <set>AlignCenter</set>
-       </property>
-      </column>
-     </widget>
-    </item>
-    <item row="0" column="0" colspan="3">
-     <widget class="QTableWidget" name="tableWidget">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-        <horstretch>0</horstretch>
-        <verstretch>3</verstretch>
-       </sizepolicy>
-      </property>
-      <column>
-       <property name="text">
-        <string>序号</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>时间</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>源地址</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>目的地址</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>协议</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>长度</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>信息</string>
-       </property>
-      </column>
-     </widget>
-    </item>
-   </layout>
+   <widget class="QWidget" name="">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>0</y>
+      <width>1491</width>
+      <height>831</height>
+     </rect>
+    </property>
+    <layout class="QVBoxLayout" name="verticalLayout_7">
+     <item>
+      <layout class="QVBoxLayout" name="verticalLayout_5">
+       <item>
+        <widget class="QLabel" name="label">
+         <property name="text">
+          <string>数据包捕获界面</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QTableWidget" name="tableWidget">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+           <horstretch>0</horstretch>
+           <verstretch>3</verstretch>
+          </sizepolicy>
+         </property>
+         <column>
+          <property name="text">
+           <string>序号</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>时间</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>源地址</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>目的地址</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>协议</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>长度</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>信息</string>
+          </property>
+         </column>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QVBoxLayout" name="verticalLayout_6">
+       <item>
+        <widget class="QGroupBox" name="groupBox">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="title">
+          <string>网络攻击过滤器</string>
+         </property>
+         <layout class="QHBoxLayout" name="horizontalLayout">
+          <item>
+           <widget class="QCheckBox" name="checkBoxDDOS">
+            <property name="text">
+             <string>DDOS</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="checkBoxUser">
+            <property name="text">
+             <string>用户名</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="checkBoxCredit">
+            <property name="text">
+             <string>银行卡</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="checkBoxScanAttack">
+            <property name="text">
+             <string>扫描攻击</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="checkBoxForkBoom">
+            <property name="text">
+             <string>Fork boom</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="checkBoxTxtFilename">
+            <property name="text">
+             <string>txt文件</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="checkBoxPicFilename">
+            <property name="text">
+             <string>图片</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <layout class="QGridLayout" name="gridLayout">
+         <item row="0" column="0">
+          <layout class="QVBoxLayout" name="verticalLayout_4">
+           <item>
+            <widget class="QLabel" name="label_5">
+             <property name="text">
+              <string>详细信息</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QTreeWidget" name="treeWidget">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+               <horstretch>3</horstretch>
+               <verstretch>2</verstretch>
+              </sizepolicy>
+             </property>
+             <column>
+              <property name="text">
+               <string notr="true">1</string>
+              </property>
+             </column>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item row="0" column="1">
+          <layout class="QVBoxLayout" name="verticalLayout_2">
+           <item>
+            <widget class="QLabel" name="label_2">
+             <property name="text">
+              <string>攻击信息</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QTableWidget" name="tableWidgetAttackInfo">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+               <horstretch>0</horstretch>
+               <verstretch>3</verstretch>
+              </sizepolicy>
+             </property>
+             <column>
+              <property name="text">
+               <string>序号</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>源地址</string>
+              </property>
+              <property name="textAlignment">
+               <set>AlignCenter</set>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>目的地址</string>
+              </property>
+              <property name="textAlignment">
+               <set>AlignCenter</set>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>网络攻击分类</string>
+              </property>
+              <property name="textAlignment">
+               <set>AlignCenter</set>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>已泄漏数据</string>
+              </property>
+              <property name="textAlignment">
+               <set>AlignCenter</set>
+              </property>
+             </column>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item row="1" column="0">
+          <layout class="QVBoxLayout" name="verticalLayout">
+           <item>
+            <widget class="QLabel" name="label_3">
+             <property name="text">
+              <string>十六进制信息</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QTextBrowser" name="textBrowserDump">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+               <horstretch>2</horstretch>
+               <verstretch>2</verstretch>
+              </sizepolicy>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item row="1" column="1">
+          <layout class="QVBoxLayout" name="verticalLayout_3">
+           <item>
+            <widget class="QLabel" name="label_4">
+             <property name="text">
+              <string>原始数据</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QTextBrowser" name="textBrowserRaw">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+               <horstretch>3</horstretch>
+               <verstretch>2</verstretch>
+              </sizepolicy>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <widget class="QToolBar" name="toolBar">
+   <property name="windowTitle">
+    <string>toolBar</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="separator"/>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1244</width>
-     <height>22</height>
+     <width>1523</width>
+     <height>19</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuasd">
@@ -248,21 +330,6 @@
     </property>
     <addaction name="actionStatic"/>
    </widget>
-   <widget class="QMenu" name="menuHack">
-    <property name="title">
-     <string>Hack</string>
-    </property>
-    <widget class="QMenu" name="menuScan">
-     <property name="title">
-      <string>Scan</string>
-     </property>
-     <addaction name="actionNmap"/>
-    </widget>
-    <addaction name="actionDDOS"/>
-    <addaction name="actionUnencrypted_infomation"/>
-    <addaction name="menuScan"/>
-    <addaction name="actionFork_bomb"/>
-   </widget>
    <widget class="QMenu" name="menuAbout">
     <property name="title">
      <string>About</string>
@@ -271,21 +338,7 @@
    <addaction name="menuasd"/>
    <addaction name="menuCapture"/>
    <addaction name="menuAnalyze"/>
-   <addaction name="menuHack"/>
    <addaction name="menuAbout"/>
-  </widget>
-  <widget class="QStatusBar" name="statusbar"/>
-  <widget class="QToolBar" name="toolBar">
-   <property name="windowTitle">
-    <string>toolBar</string>
-   </property>
-   <attribute name="toolBarArea">
-    <enum>TopToolBarArea</enum>
-   </attribute>
-   <attribute name="toolBarBreak">
-    <bool>false</bool>
-   </attribute>
-   <addaction name="separator"/>
   </widget>
   <action name="actionOpen_pcap">
    <property name="text">

@@ -15,7 +15,6 @@ from scapy.layers import http
 import numpy as np
 import matplotlib.pyplot as plt
 
-import pcapy
 import argparse
 import logging
 import scapy
@@ -92,15 +91,15 @@ def scan_check(in_packet):
         print("NULL scan detected from " + in_packet.srcIP)
         # print_alert("NULL scan", in_packet.srcIP, in_packet.protocol, "aaa")
         # print("NULL scan"+ in_packet.srcIP+ in_packet.protocol)
-        return 1
+        return in_packet.rawData
     elif in_packet.flags == FIN_FLAG:  # FIN SCAN
         # print_alert("FIN scan", in_packet.srcIP, in_packet.protocol, "aaa")
         print("FIN scan detected")
-        return 1
+        return in_packet.rawData
     elif in_packet.flags == XMAS_FLAG:  # XMAS SCAN
         # print_alert("XMAS scan", in_packet.srcIP, in_packet.protocol, "aaa")
         print("XMAS scan detected")
-        return 1
+        return in_packet.rawData
 
 
 # nikto_check()
@@ -141,7 +140,7 @@ def shellshock_check(in_packet):
         if keyword in in_packet.rawData:
             print_alert("Shellshock attack", in_packet.srcIP, in_packet.protocol,
                         get_shock_script(in_packet.rawData))
-            return 1
+            return in_packet.rawData
 
 
 # get_username()
@@ -156,6 +155,30 @@ def get_username(raw_data):
                 # coolder modified
                 # return words[i + 1]
                 return words[i]
+
+def get_txt_filename(raw_data):
+    words = str(raw_data).split()
+    
+    # Define the regular expression pattern to match txt file names
+    pattern = r"\.txt$"
+    
+    for i in range(len(words)):
+        if re.search(pattern, words[i]):
+            # Print the filtered txt file names
+            print(words[i])
+            return words[i]
+
+def get_pic_filename(raw_data):
+    words = str(raw_data).split()
+    
+    # Define the regular expression pattern to match txt file names
+    pattern = r"\.png$"
+    
+    for i in range(len(words)):
+        if re.search(pattern, words[i]):
+            # Print the filtered txt file names
+            print(words[i])
+            return words[i]
 
 
 # getPassword()
@@ -220,13 +243,24 @@ def check_if_printable(username_password):
 # Checks whether or not credentials have been sent in-the-clear. If it believes
 # there are credentials in the packet, sends to find_user_pass() to find and
 # report them.
-def user_pass_check(raw_packet, parsed_packet):
+def user_pass_check(raw_packet):
     global ALERT_COUNTER, tempUserPass
+    
+    words = str(raw_packet).split()
 
     # print("user pass fun called")
     data = raw_packet.rawData.splitlines()
+    print(data)
+    # print(packet[Raw].load.decode('utf-8','ignore'))
     for line in data:
+        # for user_keyword in USER_KEYWORDS:
+        #     if user_keyword in line:
+        #         return line
 
+        # for pass_keyword in PASS_KEYWORDS:
+        #     if pass_keyword in line:
+        #         return line
+        
         for user_keyword in USER_KEYWORDS:
             if user_keyword in line:
                 return True
@@ -234,6 +268,8 @@ def user_pass_check(raw_packet, parsed_packet):
         for pass_keyword in PASS_KEYWORDS:
             if pass_keyword in line:
                 return True
+    
+    
         # if HTTP_AUTH_KEYWD in line:
         # words = line.split()
         # user_pass = words[2]
@@ -275,7 +311,7 @@ def credit_card_check(in_packet):
         union_pay_num = findall('^(62[0-9]{14,17})', str(line))
 
         if visa_num or mastercard_num or diners_club_num:
-            return True
+            return line
 
 
 
@@ -290,7 +326,7 @@ def sniff_packet(in_packet):
     scan_check(temp_packet)
     nikto_check(temp_packet)
     shellshock_check(temp_packet)
-    user_pass_check(temp_packet, in_packet)
+    user_pass_check(temp_packet)
     credit_card_check(temp_packet)
 
 
@@ -309,6 +345,8 @@ isUserCheckBoxChecked = False
 isCreditCheckBoxChecked = False
 isScanAttackCheckBoxChecked = False
 isForkBoomCheckBoxChecked = False
+isTxtFilenameCheckBoxChecked = False
+isPicFilenameCheckBoxChecked = False
 
 
 
@@ -425,6 +463,8 @@ class SnifferMainWindow(Ui_MainWindow,QtWidgets.QMainWindow):
         global isCreditCheckBoxChecked
         global isScanAttackCheckBoxChecked
         global isForkBoomCheckBoxChecked
+        global isTxtFilenameCheckBoxChecked
+        global isPicFilenameCheckBoxChecked
 
         if self.checkBoxDDOS.isChecked():
             isDDOSCheckBoxChecked = True
@@ -452,6 +492,16 @@ class SnifferMainWindow(Ui_MainWindow,QtWidgets.QMainWindow):
         else:
              isScanAttackCheckBoxChecked = False
 
+
+        if self.checkBoxTxtFilename.isChecked():
+             isTxtFilenameCheckBoxChecked = True
+        else:
+             isTxtFilenameCheckBoxChecked = False
+
+        if self.checkBoxPicFilename.isChecked():
+             isPicFilenameCheckBoxChecked = True
+        else:
+             isPicFilenameCheckBoxChecked = False
 
     def about(self):
         msg = QMessageBox()
@@ -641,34 +691,6 @@ class SnifferMainWindow(Ui_MainWindow,QtWidgets.QMainWindow):
             self.tableWidget.setItem(row,3, QtWidgets.QTableWidgetItem(packet[IP].dst))
             self.tableWidget.setItem(row,5, QtWidgets.QTableWidgetItem(str(len(packet))))
 
-            '''
-            # import chardet
-            # print(chardet.detect(raw(packet)))
-            可以检测编码
-          '''
-
-            '''
-            在工作中，经常遇到，读取一个文件，或者是从网页获取一个问题，明明看着是gb2312的编码，可是当使用decode转时，总是出错，这个时候，可以使用decode('gb18030')这个字符集来解决，如果还是有问题，这个时候，一定要注意，decode还有一个参数，比如，若要将某个 String对象s从gbk内码转换为UTF-8，可以如下操作
-            `s.decode('gbk').encode('utf-8′) `
-            可是，在实际开发中，我发现，这种办法经常会出现异常：
-            >UnicodeDecodeError: ‘gbk' codec can't decode bytes in position 30664-30665: illegal multibyte sequence
-
-            这是因为遇到了非法字符——尤其是在某些用C/C++编写的程序中，***全角空格***往往有多种不同的实现方式，比如`\xa3\xa0`，或者`\xa4\x57`，这些字符，看起来都是全角空格，但它们并不是“合法”的全角空格（真正的全角空格是`\xa1\xa1`），因此在转码的过程中出现了异常。这样的问题很让人头疼，因为只要字符串中出现了一个非法字符，整个字符串——有时候，就是整篇文章——就都无法转码。 解决办法：
-            `s.decode('gbk', ‘ignore').encode('utf-8′) `
-            因为decode的函数原型是 `decode([encoding], [errors='strict'])`，可以用第二个参数控制错误处理的策略，默认的参数就是strict，代表遇到非法字符时抛出异常；
-
-            * 如果设置为ignore，则会忽略非法字符；
-            * 如果设置为replace，则会用?取代非法字符；
-            * 如果设置为xmlcharrefreplace，则使用XML的字符引用。
-
-            参考：
-
-            * http://blog.chinaunix.net/u2/68206/showart.php?id=668359
-            * http://www.pythonclub.org/python-basic/codec
-            * http://www.pythonclub.org/python-scripts/quanjiao-banjiao
-            * http://www.pythonclub.org/python-basic/chardet
-            Edit By [MaHua](http://mahua.jser.me)
-           '''
 
             self.tableWidget.setItem(row,7, QtWidgets.QTableWidgetItem(raw(packet).decode('Windows-1252','ignore')))
 
@@ -683,7 +705,8 @@ class SnifferMainWindow(Ui_MainWindow,QtWidgets.QMainWindow):
                     #print("Hll")
                     # DDOS
                 if isForkBoomCheckBoxChecked:
-                    if shellshock_check(temp_packet):
+                    data = shellshock_check(temp_packet)
+                    if data is not None:
                         row = self.tableWidgetAttackInfo.rowCount()
                         self.tableWidgetAttackInfo.insertRow(row)
                         self.tableWidgetAttackInfo.setItem(row,0, QtWidgets.QTableWidgetItem(str(count)))
@@ -694,35 +717,64 @@ class SnifferMainWindow(Ui_MainWindow,QtWidgets.QMainWindow):
                 if isUserCheckBoxChecked:
                     # print(isUserCheckBoxChecked)
                     # print("Hello, user check enable")
-                    if user_pass_check(temp_packet, packet):
+                    data = user_pass_check(temp_packet)
+                    if data is not None:
                         row = self.tableWidgetAttackInfo.rowCount()
                         self.tableWidgetAttackInfo.insertRow(row)
                         self.tableWidgetAttackInfo.setItem(row,0, QtWidgets.QTableWidgetItem(str(count)))
                         self.tableWidgetAttackInfo.setItem(row,1, QtWidgets.QTableWidgetItem(packet[IP].src))
                         self.tableWidgetAttackInfo.setItem(row,2, QtWidgets.QTableWidgetItem(packet[IP].dst))
                         self.tableWidgetAttackInfo.setItem(row,3, QtWidgets.QTableWidgetItem(str("username or passwd leak")))
+                        self.tableWidgetAttackInfo.setItem(row,4, QtWidgets.QTableWidgetItem(str(data)))
 
                 if isCreditCheckBoxChecked:
                     # print("Hello, credit check enable")
-                    if credit_card_check(temp_packet):
+                    data = credit_card_check(temp_packet)
+                    if data is not None:
                         row = self.tableWidgetAttackInfo.rowCount()
                         self.tableWidgetAttackInfo.insertRow(row)
                         self.tableWidgetAttackInfo.setItem(row,0, QtWidgets.QTableWidgetItem(str(count)))
                         self.tableWidgetAttackInfo.setItem(row,1, QtWidgets.QTableWidgetItem(packet[IP].src))
                         self.tableWidgetAttackInfo.setItem(row,2, QtWidgets.QTableWidgetItem(packet[IP].dst))
                         self.tableWidgetAttackInfo.setItem(row,3, QtWidgets.QTableWidgetItem(str("credit card leak")))
+                        self.tableWidgetAttackInfo.setItem(row,4, QtWidgets.QTableWidgetItem(str(data)))
 
                 if isScanAttackCheckBoxChecked:
                     # print("Hello, scan check enable")
-                    if scan_check(temp_packet):
+                    data = scan_check(temp_packet)
+                    if data is not None:
                         row = self.tableWidgetAttackInfo.rowCount()
                         self.tableWidgetAttackInfo.insertRow(row)
                         self.tableWidgetAttackInfo.setItem(row,0, QtWidgets.QTableWidgetItem(str(count)))
                         self.tableWidgetAttackInfo.setItem(row,1, QtWidgets.QTableWidgetItem(packet[IP].src))
                         self.tableWidgetAttackInfo.setItem(row,2, QtWidgets.QTableWidgetItem(packet[IP].dst))
                         self.tableWidgetAttackInfo.setItem(row,3, QtWidgets.QTableWidgetItem(str("scan check")))
+                        self.tableWidgetAttackInfo.setItem(row,4, QtWidgets.QTableWidgetItem(str(data)))
 
-                    # nikto_check(packet)
+                if isPicFilenameCheckBoxChecked:
+                    # print("Hello, scan check enable")
+                    data = get_pic_filename(temp_packet)
+                    if data is not None:
+                        row = self.tableWidgetAttackInfo.rowCount()
+                        self.tableWidgetAttackInfo.insertRow(row)
+                        self.tableWidgetAttackInfo.setItem(row,0, QtWidgets.QTableWidgetItem(str(count)))
+                        self.tableWidgetAttackInfo.setItem(row,1, QtWidgets.QTableWidgetItem(packet[IP].src))
+                        self.tableWidgetAttackInfo.setItem(row,2, QtWidgets.QTableWidgetItem(packet[IP].dst))
+                        self.tableWidgetAttackInfo.setItem(row,3, QtWidgets.QTableWidgetItem(str("TXT file found")))
+                        self.tableWidgetAttackInfo.setItem(row,4, QtWidgets.QTableWidgetItem(str(data)))
+                        
+                if isTxtFilenameCheckBoxChecked:
+                    # print("Hello, scan check enable")
+                    data = get_txt_filename(temp_packet)
+                    if data is not None:
+                        row = self.tableWidgetAttackInfo.rowCount()
+                        self.tableWidgetAttackInfo.insertRow(row)
+                        self.tableWidgetAttackInfo.setItem(row,0, QtWidgets.QTableWidgetItem(str(count)))
+                        self.tableWidgetAttackInfo.setItem(row,1, QtWidgets.QTableWidgetItem(packet[IP].src))
+                        self.tableWidgetAttackInfo.setItem(row,2, QtWidgets.QTableWidgetItem(packet[IP].dst))
+                        self.tableWidgetAttackInfo.setItem(row,3, QtWidgets.QTableWidgetItem(str("Picture found")))
+                        self.tableWidgetAttackInfo.setItem(row,4, QtWidgets.QTableWidgetItem(str(data)))
+                        
                 #HTTP
                 if packet[TCP].dport == 80 or packet[TCP].sport == 80:
                     self.tableWidget.setItem(row,4, QtWidgets.QTableWidgetItem('HTTP'))
