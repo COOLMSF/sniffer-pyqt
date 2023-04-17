@@ -157,28 +157,27 @@ def get_username(raw_data):
                 return words[i]
 
 def get_txt_filename(raw_data):
-    words = str(raw_data).split()
+    
+    lines = raw_data.rawData.splitlines()
     
     # Define the regular expression pattern to match txt file names
     pattern = r"\.txt$"
     
-    for i in range(len(words)):
-        if re.search(pattern, words[i]):
-            # Print the filtered txt file names
-            print(words[i])
-            return words[i]
+    for line in lines:
+        if re.search(pattern, line):
+            return line
+    
+
 
 def get_pic_filename(raw_data):
-    words = str(raw_data).split()
     
     # Define the regular expression pattern to match txt file names
-    pattern = r"\.png$"
+    pattern = r"\.txt$"
     
-    for i in range(len(words)):
-        if re.search(pattern, words[i]):
-            # Print the filtered txt file names
-            print(words[i])
-            return words[i]
+    lines = raw_data.rawData.splitlines()
+    for line in lines:
+        if re.search(pattern, line):
+            return line
 
 
 # getPassword()
@@ -253,41 +252,14 @@ def user_pass_check(raw_packet):
     # print(data)
     # print(packet[Raw].load.decode('utf-8','ignore'))
     for line in data:
-        # for user_keyword in USER_KEYWORDS:
-        #     if user_keyword in line:
-        #         return line
-
-        # for pass_keyword in PASS_KEYWORDS:
-        #     if pass_keyword in line:
-        #         return line
-        
         for user_keyword in USER_KEYWORDS:
             if user_keyword in line:
-                return True
+                return line
 
         for pass_keyword in PASS_KEYWORDS:
             if pass_keyword in line:
-                return True
-    
-    
-        # if HTTP_AUTH_KEYWD in line:
-        # words = line.split()
-        # user_pass = words[2]
-        # if ((len(user_pass) % 4) == 0) and (user_pass[-1] == '='):
-        #     if not check_if_printable(user_pass):
-        #         pass
-        #     return TRUE
-            # print_alert("Username and password sent in-the-clear", raw_packet.srcIP, raw_packet.protocol,
-                        # b64decode(user_pass))
-        # if USER_KEYWORDS in line  or PASS_KEYWORDS in line:
-        #     return TRUE
-
-    # raw_data = str(parsed_packet.getlayer(Raw))
-    # for keyword in USER_KEYWORDS:
-    #     if keyword in raw_data.lower() or (len(tempUserPass) > 1):
-    #         # find_user_pass(raw_packet, parsed_packet)
-    #         return TRUE
-
+                return line
+        
 
 # credit_card_check()
 #
