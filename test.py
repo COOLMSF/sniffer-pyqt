@@ -1,14 +1,41 @@
-import re
+from scapy.all import *
 
-# Define the regular expression pattern to match txt file names
-pattern = r"\.txt$"
+import math
 
 
-data = "aaa.txt is not valid"
-# Filter the file names in the network package directory using the regular expression pattern
-txt_files = [ data for d in data if re.search(pattern, d) ]
 
-# Print the filtered txt file names
-print(txt_files)
+def packet_entropy(pkt):
+
+    if IP in pkt and pkt.haslayer(TCP):
+
+        ip_payload = pkt[IP].payload
+
+        if len(ip_payload) > 0:
+
+            counts = dict()
+
+            for byte in ip_payload:
+
+                if byte in counts:
+
+                    counts[byte] += 1
+
+                else:
+
+                    counts[byte] = 1
+
+            entropy = 0
+
+            for count in counts.values():
+
+                probability = count / float(len(ip_payload))
+
+                entropy -= probability * math.log(probability, 2)
+
+            print("Entropy: {:.3f}".format(entropy))
+
+
+
+sniff(filter="ip", prn=packet_entropy)
 
 

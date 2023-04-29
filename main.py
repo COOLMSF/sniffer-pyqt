@@ -62,6 +62,18 @@ class Packet:
         self.rawData = str(in_packet)
         self.flags = in_packet[TCP].flags
 
+def string_entropy(s):
+    freqs = {}
+    for c in s:
+        if c in freqs:
+            freqs[c] += 1
+        else:
+            freqs[c] = 1
+    entropy = 0
+    for freq in freqs.values():
+        p = float(freq) / len(s)
+        entropy -= p * math.log(p, 2)
+    return entropy
 
 # print_alert()
 #
@@ -334,7 +346,10 @@ class SnifferMainWindow(Ui_MainWindow,QtWidgets.QMainWindow):
     def setupUi(self, MainWindow):
         super(SnifferMainWindow, self).setupUi(MainWindow)
 
-        #col = self.tableWidget.columnCount()
+        # stretch
+        self.tableWidget.horizontalHeader().setStretchLastSection(True)
+        self.tableWidgetAttackInfo.horizontalHeader().setStretchLastSection(True)
+        
         self.tableWidget.insertColumn(7)
         self.tableWidget.setColumnHidden(7,True)#将最后一列隐藏
         self.tableWidget.horizontalHeader().setSectionsClickable(False) #可以禁止点击表头的列
@@ -640,7 +655,35 @@ class SnifferMainWindow(Ui_MainWindow,QtWidgets.QMainWindow):
 
 
 
-
+    
+    def packet_entropy(self, pkt):
+        if IP in pkt:
+            ip_payload = pkt[IP].payload
+            entropy = 0
+            if len(ip_payload) > 0:
+                counts = dict()
+                for b in ip_payload:
+                    if b in counts:
+                        counts[b] += 1
+                    else:
+                        counts[b] = 1
+                for count in counts.values():
+                    probability = count / float(len(ip_payload))
+                    entropy -= probability * math.log(probability, 2)
+            # print("Entropy: {:.3f}".format(entropy))
+            return entropy
+        
+    
+    # Define a function to check if a packet is encrypted based on its entropy
+    def is_encrypted(self, packet):
+        # Calculate the entropy of the packet's payload
+        payload_entropy = string_entropy(str(packet))
+        print("entropy: " + str(payload_entropy))
+        # Check if the entropy value is above a certain threshold
+        if payload_entropy > 7.5:
+            return "True"
+        # If the entropy value is below the threshold, assume the packet is not encrypted
+        return "False"
 
     #显示捕获的数据包
     def display(self,packet):
@@ -665,6 +708,9 @@ class SnifferMainWindow(Ui_MainWindow,QtWidgets.QMainWindow):
             self.tableWidget.setItem(row,3, QtWidgets.QTableWidgetItem(packet[IP].dst))
             self.tableWidget.setItem(row,5, QtWidgets.QTableWidgetItem(str(len(packet))))
 
+            data = self.is_encrypted(str(packet))
+            print(data)
+            self.tableWidget.setItem(row,8, QtWidgets.QTableWidgetItem(data))
 
             self.tableWidget.setItem(row,7, QtWidgets.QTableWidgetItem(raw(packet).decode('Windows-1252','ignore')))
 
