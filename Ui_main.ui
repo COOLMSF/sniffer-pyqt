@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1523</width>
-    <height>890</height>
+    <width>1440</width>
+    <height>872</height>
    </rect>
   </property>
   <property name="contextMenuPolicy">
@@ -17,7 +17,7 @@
    <string>Sniffer</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QWidget" name="">
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
       <x>10</x>
@@ -77,6 +77,11 @@
          <column>
           <property name="text">
            <string>信息</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>是否加密</string>
           </property>
          </column>
         </widget>
@@ -151,6 +156,48 @@
        </item>
        <item>
         <layout class="QGridLayout" name="gridLayout">
+         <item row="1" column="1">
+          <layout class="QVBoxLayout" name="verticalLayout_3">
+           <item>
+            <widget class="QLabel" name="label_4">
+             <property name="text">
+              <string>原始数据</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QTextBrowser" name="textBrowserRaw">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+               <horstretch>3</horstretch>
+               <verstretch>2</verstretch>
+              </sizepolicy>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item row="1" column="0">
+          <layout class="QVBoxLayout" name="verticalLayout">
+           <item>
+            <widget class="QLabel" name="label_3">
+             <property name="text">
+              <string>十六进制信息</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QTextBrowser" name="textBrowserDump">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+               <horstretch>2</horstretch>
+               <verstretch>2</verstretch>
+              </sizepolicy>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
          <item row="0" column="0">
           <layout class="QVBoxLayout" name="verticalLayout_4">
            <item>
@@ -203,76 +250,22 @@
               <property name="text">
                <string>源地址</string>
               </property>
-              <property name="textAlignment">
-               <set>AlignCenter</set>
-              </property>
              </column>
              <column>
               <property name="text">
                <string>目的地址</string>
-              </property>
-              <property name="textAlignment">
-               <set>AlignCenter</set>
               </property>
              </column>
              <column>
               <property name="text">
                <string>网络攻击分类</string>
               </property>
-              <property name="textAlignment">
-               <set>AlignCenter</set>
-              </property>
              </column>
              <column>
               <property name="text">
                <string>已泄漏数据</string>
               </property>
-              <property name="textAlignment">
-               <set>AlignCenter</set>
-              </property>
              </column>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item row="1" column="0">
-          <layout class="QVBoxLayout" name="verticalLayout">
-           <item>
-            <widget class="QLabel" name="label_3">
-             <property name="text">
-              <string>十六进制信息</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QTextBrowser" name="textBrowserDump">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-               <horstretch>2</horstretch>
-               <verstretch>2</verstretch>
-              </sizepolicy>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item row="1" column="1">
-          <layout class="QVBoxLayout" name="verticalLayout_3">
-           <item>
-            <widget class="QLabel" name="label_4">
-             <property name="text">
-              <string>原始数据</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QTextBrowser" name="textBrowserRaw">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-               <horstretch>3</horstretch>
-               <verstretch>2</verstretch>
-              </sizepolicy>
-             </property>
             </widget>
            </item>
           </layout>
@@ -302,8 +295,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1523</width>
-     <height>19</height>
+     <width>1440</width>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuasd">
