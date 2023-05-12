@@ -27,29 +27,49 @@ from datetime import datetime
 NULL_FLAG = 0b00000000
 FIN_FLAG = 0b00000001
 XMAS_FLAG = 0b00101001
-HTTP_AUTH_KEYWD = "Authorization: Basic"
-NIKTO_KEYWORDS = ["Nikto", "nikto", "NIKTO"]
-SHOCK_KEYWORDS = ["() { :; };", "(){:;};", "() { :;};", "() { : ; } ;", "() {:; };"]
-USER_KEYWORDS = ["mac", "log", "login", "wpname", "ahd_username", "unickname", "nickname", "user", "user_name", "alias",
-                 "pseudo", "email", "username", "_username", "userid", "form_loginname", "loginname", "login_id",
-                 "loginid", "session_key", "sessionkey", "pop_login", " uid", " id", "user_id", "screenname", "uname",
-                 "ulogin", "acctname", "account", "member", "mailaddress", "membername", "login_username",
-                 "login_email", "loginusername", "loginemail", "uin", "sign-in"]
-PASS_KEYWORDS = ["pass", "ahd_password", "pass password", "_password passwd", "session_password", "sessionpassword",
-                 "login_password", "loginpassword", "form_pw", "pw", "userpassword", "pwd", "upassword",
-                 "login_password", "passwort", "passwrd", "wppassword", "upasswd"]
+# HTTP_AUTH_KEYWD = "Authorization: Basic"
+# NIKTO_KEYWORDS = ["Nikto", "nikto", "NIKTO"]
+# SHOCK_KEYWORDS = ["() { :; };", "(){:;};", "() { :;};", "() { : ; } ;", "() {:; };"]
+# USER_KEYWORDS = ["mac", "log", "login", "wpname", "ahd_username", "unickname", "nickname", "user", "user_name", "alias",
+#                  "pseudo", "email", "username", "_username", "userid", "form_loginname", "loginname", "login_id",
+#                  "loginid", "session_key", "sessionkey", "pop_login", " uid", " id", "user_id", "screenname", "uname",
+#                  "ulogin", "acctname", "account", "member", "mailaddress", "membername", "login_username",
+#                  "login_email", "loginusername", "loginemail", "uin", "sign-in"]
+# PASS_KEYWORDS = ["pass", "ahd_password", "pass password", "_password passwd", "session_password", "sessionpassword",
+#                  "login_password", "loginpassword", "form_pw", "pw", "userpassword", "pwd", "upassword",
+#                  "login_password", "passwort", "passwrd", "wppassword", "upasswd"]
 PROTOCOLS = ["HOPOPT", "ICMP", "IGMP", "GGP", "IPv4", "ST", "TCP", "CBT", "EGP", "IGP", "BBN-RCC-MON", "NVP-II", "PUP",
-             "ARGUS", "EMCON", "XNET", "CHAOS", ]
-LOG = "logs\\{{{}}}.log"
+            "ARGUS", "EMCON", "XNET", "CHAOS", ]
+HTTP_AUTH_KEYWD = list()
+NIKTO_KEYWORDS = list()
+SHOCK_KEYWORDS = list()
+USER_KEYWORDS = list()
+PASS_KEYWORDS = list()
 
-# Dynamic Global Vars
-ALERT_COUNTER = 1
-tempUserPass = ''
 
+def kmp(text, pattern):
+    n = len(text)
+    m = len(pattern)
+    if m == 0:
+        return 0
+    fail = [0] * m
+    j = 0
+    for i in range(1, m):
+        while j > 0 and pattern[j] != pattern[i]:
+            j = fail[j-1]
+        if pattern[j] == pattern[i]:
+            j += 1
+        fail[i] = j
+    j = 0
+    for i in range(n):
+        while j > 0 and pattern[j] != text[i]:
+            j = fail[j-1]
+        if pattern[j] == text[i]:
+            j += 1
+        if j == m:
+            return i - m + 1
+    return -1
 
-# Packet class
-#
-# Holds information from the packet so the instance of a Scapy Packet does not need to be passed around.
 class Packet:
     srcIP = ''
     protocol = ''
@@ -99,7 +119,7 @@ def print_alert(scan_type, src, proto, payload):
 def scan_check(in_packet):
     global ALERT_COUNTER
 
-    if in_packet.flags == NULL_FLAG:  # NULL SCAN
+    if in_packet.flags == NULL_FLAG:  # NULL SCAf N
         print("NULL scan detected from " + in_packet.srcIP)
         # print_alert("NULL scan", in_packet.srcIP, in_packet.protocol, "aaa")
         # print("NULL scan"+ in_packet.srcIP+ in_packet.protocol)
@@ -133,9 +153,14 @@ def get_shock_script(packet_data):
     shellshock_line = ""  # Return empty string if not found
 
     data = packet_data.splitlines()
+    # for line in data:
+    #     for keyword in SHOCK_KEYWORDS:
+    #         if keyword in line:
+    #             shellshock_line = line
+    #             break
     for line in data:
         for keyword in SHOCK_KEYWORDS:
-            if keyword in line:
+            if kmp(line, keyword) != -1:
                 shellshock_line = line
                 break
 
@@ -149,7 +174,7 @@ def shellshock_check(in_packet):
     global ALERT_COUNTER
 
     for keyword in SHOCK_KEYWORDS:
-        if keyword in in_packet.rawData:
+        if kmp(str(in_packet.rawData), keyword) != -1:
             print_alert("Shellshock attack", in_packet.srcIP, in_packet.protocol,
                         get_shock_script(in_packet.rawData))
             return in_packet.rawData
@@ -163,7 +188,8 @@ def get_username(raw_data):
 
     for i in range(len(words)):
         for keyword in USER_KEYWORDS:
-            if keyword in words[i].lower():
+            # if keyword in words[i].lower():
+            if kmp(words[i], keyword) != -1:
                 # coolder modified
                 # return words[i + 1]
                 return words[i]
@@ -333,6 +359,21 @@ isTxtFilenameCheckBoxChecked = False
 isPicFilenameCheckBoxChecked = False
 
 
+def load_rules(filename):
+    with open(filename, 'r') as f:
+        lines = f.readlines()
+        for line in lines:
+            rule = line.strip()
+            if "nickto" in filename or "NICKTO" in filename:
+                NIKTO_KEYWORDS.append(rule)
+            if "http" in filename or "HTTP" in filename:
+                HTTP_AUTH_KEYWD.append(rule)
+            if "shock" in filename or "SHOCK" in filename:
+                NIKTO_KEYWORDS.append(rule)
+            if "user" in filename or "USER" in filename:
+                USER_KEYWORDS.append(rule)
+            if "pass" in filename or "PASS" in filename:
+                PASS_KEYWORDS.append(rule)
 
 
 class SnifferMainWindow(Ui_MainWindow,QtWidgets.QMainWindow):
@@ -342,6 +383,8 @@ class SnifferMainWindow(Ui_MainWindow,QtWidgets.QMainWindow):
     q = multiprocessing.Queue()
     def __init(self):
         super(SnifferMainWindow,self).__init__()
+        for rule_file in os.listdir("rules"):
+            load_rules(rule_file)
 
     def setupUi(self, MainWindow):
         super(SnifferMainWindow, self).setupUi(MainWindow)
@@ -1490,7 +1533,8 @@ class SnifferMainWindow(Ui_MainWindow,QtWidgets.QMainWindow):
 
     #遍历网卡
     def LookupIface(self):
-        netcards = os.listdir('/sys/class/net/')
+        # netcards = os.listdir('/sys/class/net/')
+        netcards = ['aaa', 'bbb', 'ccc']
         eth_local=[]
         # a = repr(conf.route).split('\n')[1:]
         # for x in a:

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1440</width>
+    <width>1293</width>
     <height>872</height>
    </rect>
   </property>
@@ -148,6 +148,13 @@
            <widget class="QCheckBox" name="checkBoxPicFilename">
             <property name="text">
              <string>图片</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btn_choose_rule_dir">
+            <property name="text">
+             <string>选择规则文件</string>
             </property>
            </widget>
           </item>
@@ -295,7 +302,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1440</width>
+     <width>1293</width>
      <height>22</height>
     </rect>
    </property>
