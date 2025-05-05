@@ -1533,8 +1533,7 @@ class SnifferMainWindow(Ui_MainWindow,QtWidgets.QMainWindow):
 
     #遍历网卡
     def LookupIface(self):
-        # netcards = os.listdir('/sys/class/net/')
-        netcards = ['aaa', 'bbb', 'ccc']
+        netcards = os.listdir('/sys/class/net/')
         eth_local=[]
         # a = repr(conf.route).split('\n')[1:]
         # for x in a:
