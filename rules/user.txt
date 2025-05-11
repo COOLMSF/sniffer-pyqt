@@ -5,6 +5,7 @@ wpname
 ahd_username
 unickname
 nickname
+foobar
 user
 user_name
 alias

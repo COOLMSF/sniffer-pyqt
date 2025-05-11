@@ -1573,6 +1573,9 @@ class SnifferMainWindow(Ui_MainWindow,QtWidgets.QMainWindow):
         self.tableWidget.setRowCount(0)
         self.tableWidget.removeRow(0)
 
+        # Show message box to inform user that capturing has started
+        QtWidgets.QMessageBox.information(self, "捕获开始", f"开始在接口 {self.iface} 上捕获数据包")
+
         self.SnifferThread = SnifferThread(self.filter,self.iface)
         self.SnifferThread.HandleSignal.connect(self.display)
         self.SnifferThread.start()
@@ -1825,6 +1828,10 @@ class SnifferMainWindow(Ui_MainWindow,QtWidgets.QMainWindow):
     #停止捕获
     def Stop(self):
         self.SnifferThread.terminate()
+
+        # Show message box to inform user that capturing has started
+        QtWidgets.QMessageBox.information(self, "捕获结束", f"关闭在接口 {self.iface} 上捕获数据程序")
+
 
     #鼠标左键单击显示详细信息
     def clickInfo(self):
