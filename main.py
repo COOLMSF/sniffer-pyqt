@@ -359,21 +359,117 @@ isTxtFilenameCheckBoxChecked = False
 isPicFilenameCheckBoxChecked = False
 
 
-def load_rules(filename):
-    with open(filename, 'r') as f:
-        lines = f.readlines()
-        for line in lines:
-            rule = line.strip()
-            if "nickto" in filename or "NICKTO" in filename:
-                NIKTO_KEYWORDS.append(rule)
-            if "http" in filename or "HTTP" in filename:
-                HTTP_AUTH_KEYWD.append(rule)
-            if "shock" in filename or "SHOCK" in filename:
-                NIKTO_KEYWORDS.append(rule)
-            if "user" in filename or "USER" in filename:
-                USER_KEYWORDS.append(rule)
-            if "pass" in filename or "PASS" in filename:
-                PASS_KEYWORDS.append(rule)
+def load_rules(filename, parent=None):
+    """
+    Load security rules from file
+    
+    Args:
+        filename: Path to the rules file
+        parent: Parent widget for QMessageBox
+    
+    Returns:
+        bool: True if rules loaded successfully, False otherwise
+    """
+    try:
+        with open(filename, 'r') as f:
+            lines = f.readlines()
+            rules_loaded = []
+            for line in lines:
+                rule = line.strip()
+                if rule:  # Skip empty lines
+                    if "nickto" in filename or "NICKTO" in filename:
+                        NIKTO_KEYWORDS.append(rule)
+                        rules_loaded.append(rule)
+                    if "http" in filename or "HTTP" in filename:
+                        HTTP_AUTH_KEYWD.append(rule)
+                        rules_loaded.append(rule)
+                    if "shock" in filename or "SHOCK" in filename:
+                        NIKTO_KEYWORDS.append(rule)
+                        rules_loaded.append(rule)
+                    if "user" in filename or "USER" in filename:
+                        USER_KEYWORDS.append(rule)
+                        rules_loaded.append(rule)
+                    if "pass" in filename or "PASS" in filename:
+                        PASS_KEYWORDS.append(rule)
+                        rules_loaded.append(rule)
+            
+            if rules_loaded:
+                # Create a scrollable text area
+                widget = QWidget()
+                layout = QVBoxLayout(widget)
+                
+                # Create text edit with all rules
+                text_edit = QTextEdit()
+                text_edit.setReadOnly(True)
+                text_edit.setFont(QFont("Monospace", 10))
+                
+                # Add rule type headers and rules
+                text_edit.append(f"\nRules loaded from {filename}:")
+                
+                # Group rules by type
+                rule_groups = {
+                    "Nikto Keywords": [],
+                    "HTTP Keywords": [],
+                    "Shellshock Keywords": [],
+                    "User Keywords": [],
+                    "Password Keywords": []
+                }
+                
+                for rule in rules_loaded:
+                    if rule in NIKTO_KEYWORDS:
+                        rule_groups["Nikto Keywords"].append(rule)
+                    elif rule in HTTP_AUTH_KEYWD:
+                        rule_groups["HTTP Keywords"].append(rule)
+                    elif rule in USER_KEYWORDS:
+                        rule_groups["User Keywords"].append(rule)
+                    elif rule in PASS_KEYWORDS:
+                        rule_groups["Password Keywords"].append(rule)
+                    else:  # Shellshock keywords
+                        rule_groups["Shellshock Keywords"].append(rule)
+                
+                # Add each group of rules
+                for group_name, rules in rule_groups.items():
+                    if rules:
+                        text_edit.append(f"\n{group_name}:")
+                        for rule in rules:
+                            text_edit.append(f"- {rule}")
+                
+                layout.addWidget(text_edit)
+                
+                # Create message box with scroll area
+                msg = QMessageBox(parent)
+                msg.setWindowTitle("Rules Loaded")
+                msg.setText(f"Successfully loaded {len(rules_loaded)} rules from {filename}")
+                
+                # Set message box size
+                msg.setMinimumWidth(800)
+                msg.setMinimumHeight(600)
+                
+                # Create scroll area
+                scroll = QScrollArea()
+                scroll.setWidget(widget)
+                scroll.setWidgetResizable(True)
+                scroll.setMinimumWidth(750)
+                scroll.setMinimumHeight(500)
+                
+                # Add scroll area to message box
+                layout = msg.layout()
+                layout.addWidget(scroll, 0, 2, 1, 1)
+                
+                # Make message box modal to prevent interaction with main window
+                msg.setModal(True)
+                
+                msg.exec_()
+                
+            return True
+            
+    except Exception as e:
+        QMessageBox.warning(parent,
+            "Error Loading Rules",
+            f"Failed to load rules from {filename}: {str(e)}",
+            QMessageBox.Ok)
+        return False
+
 
 
 class SnifferMainWindow(Ui_MainWindow,QtWidgets.QMainWindow):
@@ -381,10 +477,31 @@ class SnifferMainWindow(Ui_MainWindow,QtWidgets.QMainWindow):
     iface = ""   #网卡
     packetList = []
     q = multiprocessing.Queue()
-    def __init(self):
+    def __init__(self):
         super(SnifferMainWindow,self).__init__()
-        for rule_file in os.listdir("rules"):
-            load_rules(rule_file)
+        rules_dir = "rules"
+        if not os.path.exists(rules_dir):
+            QMessageBox.critical(self, 
+                "Error", 
+                f"Rules directory '{rules_dir}' not found!",
+                QMessageBox.Ok)
+            return
+            
+        rules_loaded = 0
+        for rule_file in os.listdir(rules_dir):
+            if load_rules(os.path.join(rules_dir, rule_file), self):
+                rules_loaded += 1
+        
+        if rules_loaded > 0:
+            QMessageBox.information(self,
+                "Rules Initialization",
+                f"Successfully loaded rules from {rules_loaded} files",
+                QMessageBox.Ok)
+        else:
+            QMessageBox.warning(self,
+                "Warning",
+                "No rules were loaded. Security checks may be limited.",
+                QMessageBox.Ok)
 
     def setupUi(self, MainWindow):
         super(SnifferMainWindow, self).setupUi(MainWindow)
@@ -1082,7 +1199,7 @@ class SnifferMainWindow(Ui_MainWindow,QtWidgets.QMainWindow):
             IPv4Id = QtWidgets.QTreeWidgetItem(IPv4)
             IPv4Id.setText(0,'标识(id)：%s' % packet[IP].id)  #唯一的标识主机发送的每一分数据报。通常每发送一个报文，它的值加一。当IP报文长度超过传输网络的MTU（最大传输单元）时必须分片，这个标识字段的值被复制到所有数据分片的标识字段中，使得这些分片在达到最终目的地时可以依照标识字段的内容重新组成原先的数据。
             IPv4Flags = QtWidgets.QTreeWidgetItem(IPv4)
-            IPv4Flags.setText(0,'标志(flags)：%s' % packet[IP].flags) #R、DF、MF三位。目前只有后两位有效，DF位：为1表示不分片，为0表示分片。MF：为1表示“更多的片”，为0表示这是最后一片。
+            IPv4Flags.setText(0,'标志(flags)：%s' % packet[IP].flags) #R、DF、MF三位。目前只有后两位有效，DF位：为1表示不分片，为0表示分片。MF：为1表示"更多的片"，为0表示这是最后一片。
             IPv4Frag = QtWidgets.QTreeWidgetItem(IPv4)
 
             IPv4FlagsDF = QtWidgets.QTreeWidgetItem(IPv4Flags)
