@@ -154,18 +154,29 @@ def nikto_check(in_packet):
 #
 # Helper function to obtain the command that was attempted to be run in a Shellshock attack. Used by shellshock_check().
 def get_shock_script(packet_data):
-    shellshock_line = ""  # Return empty string if not found
+    """
+    Extract shellshock attack script from packet data
+    
+    Args:
+        packet_data: String data to search for shellshock script
+        
+    Returns:
+        str: The line containing the shellshock script, or empty string if not found
+    """
+    # Return empty string if not found
+    shellshock_line = ""  
 
+    # Split data into lines for processing
     data = packet_data.splitlines()
-    # for line in data:
-    #     for keyword in SHOCK_KEYWORDS:
-    #         if keyword in line:
-    #             shellshock_line = line
-    #             break
+    
+    # Simple string containment check for each line
     for line in data:
         for keyword in SHOCK_KEYWORDS:
-            if kmp(line, keyword) != -1:
+            # Use direct string containment instead of KMP
+            if keyword in line:
                 shellshock_line = line
+                if DEBUG_MODE:
+                    print(f"Found shellshock script: {line[:30]}...")
                 break
 
     return shellshock_line
@@ -173,30 +184,87 @@ def get_shock_script(packet_data):
 
 # shellshock_check()
 #
-# Checks a packet for traces of a Shellshock attack. Does this by looking for shellshock entry queries.
+# Checks data for traces of a Shellshock attack by looking for shellshock patterns
 def shellshock_check(data):
-    global ALERT_COUNTER
-
+    """
+    Check for shellshock vulnerability patterns in data
+    
+    Args:
+        data: String data to search for shellshock patterns
+        
+    Returns:
+        str: The shellshock script if found, or None if not found
+    """
+    if not data or not SHOCK_KEYWORDS:
+        return None
+        
+    # Ensure data is a string
+    data_str = str(data)
+    data_lower = data_str.lower()
+    
+    # Use simple string containment check instead of KMP
     for keyword in SHOCK_KEYWORDS:
-        if kmp(str(data), keyword) != -1:
-            print_alert("Shellshock attack", in_packet.srcIP, in_packet.protocol,
-                        get_shock_script(in_packet.rawData))
-            return in_packet.rawData
+        # Convert keyword to lowercase for case-insensitive matching
+        keyword_lower = keyword.lower()
+        if keyword_lower in data_lower:
+            # Extract the shellshock script if found
+            script = get_shock_script(data_str)
+            if script:
+                if DEBUG_MODE:
+                    print(f"Found shellshock pattern: {keyword}")
+                return script
+                
+    return None
 
 
 # get_username()
 #
-# Returns the username that was found in the raw data of a network packet. Helper function to find_user_pass().
+# Returns the username that was found in the raw data of a network packet
 def get_username(raw_data):
+    """
+    Extract username from raw data
+    
+    Args:
+        raw_data: String data to search for username patterns
+        
+    Returns:
+        str: The username if found, None otherwise
+    """
+    if not raw_data or not USER_KEYWORDS:
+        return None
+        
+    # Convert to string and split into words for analysis
     words = str(raw_data).split()
-
-    for i in range(len(words)):
+    
+    # Check for common username patterns first (most efficient)
+    for i, word in enumerate(words):
+        word_lower = word.lower()
+        
+        # Direct keyword match (fastest)
         for keyword in USER_KEYWORDS:
-            # if keyword in words[i].lower():
-            if kmp(words[i], keyword) != -1:
-                # coolder modified
-                # return words[i + 1]
-                return words[i]
+            if keyword.lower() in word_lower:
+                # Check if this is a username field with value following it
+                if i + 1 < len(words) and '=' not in words[i+1]:
+                    # If pattern is username=value, extract value part
+                    if '=' in word:
+                        parts = word.split('=', 1)
+                        if len(parts) > 1 and parts[1]:
+                            return parts[1].strip('"\'')
+                    # Otherwise return either current word or next word
+                    return words[i] if keyword.lower() != word_lower else words[i+1]
+                return word
+    
+    # Use regex for more complex pattern matching as fallback
+    for i, word in enumerate(words):
+        for keyword in USER_KEYWORDS:
+            # Try using regex pattern matching instead of KMP
+            pattern = re.compile(keyword.lower())
+            if pattern.search(word.lower()):
+                if DEBUG_MODE:
+                    print(f"Found username with regex: {word}")
+                return word
+                
+    return None
 
 def get_txt_filename(raw_data):
     """
@@ -371,18 +439,22 @@ def user_pass_check(data):
                         print(f"Found password keyword match: '{pass_keyword}' in '{line}'")
                     return line
                     
-        # Try KMP pattern matching as a fallback for more complex cases
+        # Try regex pattern matching as a fallback for more complex cases
         for line in data:
+            # Check for user keywords using regex
             for user_keyword in USER_KEYWORDS:
-                if kmp(line.lower(), user_keyword.lower()) != -1:
+                pattern = re.compile(re.escape(user_keyword.lower()))
+                if pattern.search(line.lower()):
                     if DEBUG_MODE:
-                        print(f"Found user keyword with KMP: '{user_keyword}' in '{line}'")
+                        print(f"Found user keyword with regex: '{user_keyword}' in '{line}'")
                     return line
                     
+            # Check for password keywords using regex
             for pass_keyword in PASS_KEYWORDS:
-                if kmp(line.lower(), pass_keyword.lower()) != -1:
+                pattern = re.compile(re.escape(pass_keyword.lower()))
+                if pattern.search(line.lower()):
                     if DEBUG_MODE:
-                        print(f"Found password keyword with KMP: '{pass_keyword}' in '{line}'")
+                        print(f"Found password keyword with regex: '{pass_keyword}' in '{line}'")
                     return line
                     
     except Exception as e:
@@ -398,22 +470,54 @@ def user_pass_check(data):
 # Checks whether or not credit card numbers have been sent in-the-clear. If it believes
 # there are credentials in the packet,
 def credit_card_check(data):
-    for line in data:
-
-        visa_num = findall('4[0-9]{12}(?:[0-9]{3})?', str(line))
-        mastercard_num = findall('(?:5[1-5][0-9]{2}|222[1-9]|22[3-9][0-9]|2[3-6][0-9]{2}|27[01][0-9]|2720)[0-9]{12}', str(line))
-        diners_club_num = findall('3(?:0[0-5]|[68][0-9])[0-9]{11}', str(line))
-        discover_num = findall('6(?:011|5[0-9]{2})[0-9]{12}', str(line))
-        jcb_num = findall('(?:2131|1800|35\d{3})\d{11}', str(line))
-        american_express_num = findall('3[47][0-9]{13}', str(line))
-        bcglobal_num = findall('^(6541|6556)[0-9]{12}', str(line))
-        korean_local_num = findall('^9[0-9]{15}', str(line))
-        laser_card_num = findall('^(6304|6706|6709|6771)[0-9]{12,15}', str(line))
-        maestro_num = findall('^(5018|5020|5038|6304|6759|6761|6763)[0-9]{8,15}', str(line))
-        union_pay_num = findall('^(62[0-9]{14,17})', str(line))
-
-        if visa_num or mastercard_num or diners_club_num:
-            return line
+    """
+    Check for credit card numbers in the data
+    
+    Args:
+        data: String data to search for credit card numbers
+        
+    Returns:
+        str: The line containing credit card numbers if found, None otherwise
+    """
+    # Ensure data is a string
+    if not isinstance(data, str):
+        data = str(data)
+    
+    # All credit card regex patterns
+    cc_patterns = {
+        'Visa': r'\b4[0-9]{12}(?:[0-9]{3})?\b',
+        'Mastercard': r'\b(?:5[1-5][0-9]{2}|222[1-9]|22[3-9][0-9]|2[3-6][0-9]{2}|27[01][0-9]|2720)[0-9]{12}\b',
+        'Diners Club': r'\b3(?:0[0-5]|[68][0-9])[0-9]{11}\b',
+        'Discover': r'\b6(?:011|5[0-9]{2})[0-9]{12}\b',
+        'JCB': r'\b(?:2131|1800|35\d{3})\d{11}\b',
+        'American Express': r'\b3[47][0-9]{13}\b',
+        'BCGlobal': r'\b(6541|6556)[0-9]{12}\b',
+        'Korean Local': r'\b9[0-9]{15}\b',
+        'Laser Card': r'\b(6304|6706|6709|6771)[0-9]{12,15}\b',
+        'Maestro': r'\b(5018|5020|5038|6304|6759|6761|6763)[0-9]{8,15}\b',
+        'Union Pay': r'\b(62[0-9]{14,17})\b'
+    }
+    
+    # Split data into lines for processing
+    lines = data.splitlines()
+    if len(lines) <= 1:
+        lines = [data]  # Process as single line if no newlines
+    
+    # Check each line for credit card patterns
+    for line in lines:
+        for card_type, pattern in cc_patterns.items():
+            if re.search(pattern, line):
+                if DEBUG_MODE:
+                    print(f"Found {card_type} credit card number in: {line[:30]}...")
+                
+                # Return context around the match
+                match = re.search(pattern, line)
+                if match:
+                    start = max(0, match.start() - 10)
+                    end = min(len(line), match.end() + 10)
+                    return f"{card_type} card: {line[start:end]}"
+    
+    return None
 
 
 # sniff_packet()
