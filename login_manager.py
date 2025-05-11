@@ -454,24 +454,20 @@ class LoginWindow(QMainWindow):
             QMessageBox.warning(self, "修改失败", message)
     
     def launch_main_application(self):
-        """Launch the main application with user role"""
+        """Launch the app selector dialog after successful login"""
         try:
-            # Get the path to main.py
-            main_script = os.path.join(os.path.dirname(os.path.abspath(__file__)), "main.py")
+            # Import the app selector dialog
+            from app_selector import AppSelectorDialog
             
-            # Start the main application
-            if sys.platform.startswith('win'):
-                # Windows
-                subprocess.Popen(["python", main_script], creationflags=subprocess.CREATE_NEW_CONSOLE)
-            else:
-                # Linux/Mac
-                subprocess.Popen(["python3", main_script])
+            # Create and show the app selector dialog
+            selector = AppSelectorDialog(parent=self, username=self.username, user_role=self.user_role)
             
-            # Close the login window
-            self.close()
+            # Show the selector dialog and close login window if user selects an application
+            if selector.exec_() == QDialog.Accepted:
+                self.close()
             
         except Exception as e:
-            QMessageBox.critical(self, "启动失败", f"启动主程序失败: {str(e)}")
+            QMessageBox.critical(self, "启动失败", f"启动应用选择器失败: {str(e)}")
     
     def closeEvent(self, event):
         """Handle window close event"""

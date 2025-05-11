@@ -319,7 +319,14 @@ class AddRuleFileDialog(QDialog):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    # For testing - default to admin role
-    dialog = RulesManager(user_role="admin")
+    
+    # Parse command line arguments
+    import argparse
+    parser = argparse.ArgumentParser(description='Rules Manager Application')
+    parser.add_argument('--role', help='User role (admin or user)', default='user')
+    args, unknown = parser.parse_known_args()
+    
+    # Create and show rules manager with specified role
+    dialog = RulesManager(user_role=args.role)
     dialog.show()
     sys.exit(app.exec_())
