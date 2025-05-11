@@ -124,7 +124,7 @@ def scan_check(in_packet):
     global ALERT_COUNTER
 
     if in_packet.flags == NULL_FLAG:  # NULL SCAf N
-        print("NULL scan detected from " + in_packet.srcIP)
+        # print("NULL scan detected from " + in_packet.srcIP)
         # print_alert("NULL scan", in_packet.srcIP, in_packet.protocol, "aaa")
         # print("NULL scan"+ in_packet.srcIP+ in_packet.protocol)
         return in_packet.rawData
@@ -199,27 +199,60 @@ def get_username(raw_data):
                 return words[i]
 
 def get_txt_filename(raw_data):
+    """
+    Find text file names in the raw data
     
-    lines = raw_data
+    Args:
+        raw_data: String data to search for .txt files
+        
+    Returns:
+        str: The matched line containing a .txt filename, or None if not found
+    """
+    # Ensure raw_data is treated as string
+    if not isinstance(raw_data, str):
+        raw_data = str(raw_data)
+        
+    # Define the regular expression pattern to efficiently match .txt filenames
+    pattern = r'\b\w+\.txt\b'
     
-    # Define the regular expression pattern to match txt file names
-    pattern = r"\.txt$"
+    # Search for pattern in the entire data at once
+    match = re.search(pattern, raw_data, re.IGNORECASE)
+    if match:
+        # Return the relevant context around the match
+        start = max(0, match.start() - 20)
+        end = min(len(raw_data), match.end() + 20)
+        return raw_data[start:end].strip()
     
-    for line in lines:
-        if re.search(pattern, line):
-            return line
-    
+    return None
 
 
 def get_pic_filename(raw_data):
+    """
+    Find picture file names in the raw data
     
-    # Define the regular expression pattern to match txt file names
-    pattern = r"\.txt$"
+    Args:
+        raw_data: String data to search for picture files
+        
+    Returns:
+        str: The matched line containing a picture filename, or None if not found
+    """
+    # Ensure raw_data is treated as string
+    if not isinstance(raw_data, str):
+        raw_data = str(raw_data)
     
-    lines = raw_data
-    for line in lines:
-        if re.search(pattern, line):
-            return line
+    # Define the regular expression pattern to match common picture file extensions
+    # Much more efficient to search for all image types at once
+    pattern = r'\b\w+\.(jpg|jpeg|png|gif|bmp|tiff|webp)\b'
+    
+    # Search for pattern in the entire data at once
+    match = re.search(pattern, raw_data, re.IGNORECASE)
+    if match:
+        # Return the relevant context around the match
+        start = max(0, match.start() - 20)
+        end = min(len(raw_data), match.end() + 20)
+        return raw_data[start:end].strip()
+    
+    return None
 
 
 # getPassword()
@@ -381,7 +414,6 @@ def credit_card_check(data):
 
         if visa_num or mastercard_num or diners_club_num:
             return line
-
 
 
 # sniff_packet()
