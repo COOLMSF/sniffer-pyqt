@@ -1,5 +1,9 @@
 # -*- coding: utf8 -*-
 
+# Configuration
+DEBUG_MODE = True  # Set to False in production to reduce console output
+
+from struct import pack
 from PyQt5 import QtCore,QtGui,QtWidgets
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
@@ -170,11 +174,11 @@ def get_shock_script(packet_data):
 # shellshock_check()
 #
 # Checks a packet for traces of a Shellshock attack. Does this by looking for shellshock entry queries.
-def shellshock_check(in_packet):
+def shellshock_check(data):
     global ALERT_COUNTER
 
     for keyword in SHOCK_KEYWORDS:
-        if kmp(str(in_packet.rawData), keyword) != -1:
+        if kmp(str(data), keyword) != -1:
             print_alert("Shellshock attack", in_packet.srcIP, in_packet.protocol,
                         get_shock_script(in_packet.rawData))
             return in_packet.rawData
@@ -196,7 +200,7 @@ def get_username(raw_data):
 
 def get_txt_filename(raw_data):
     
-    lines = raw_data.rawData.splitlines()
+    lines = raw_data
     
     # Define the regular expression pattern to match txt file names
     pattern = r"\.txt$"
@@ -212,7 +216,7 @@ def get_pic_filename(raw_data):
     # Define the regular expression pattern to match txt file names
     pattern = r"\.txt$"
     
-    lines = raw_data.rawData.splitlines()
+    lines = raw_data
     for line in lines:
         if re.search(pattern, line):
             return line
@@ -280,32 +284,87 @@ def check_if_printable(username_password):
 # Checks whether or not credentials have been sent in-the-clear. If it believes
 # there are credentials in the packet, sends to find_user_pass() to find and
 # report them.
-def user_pass_check(raw_packet):
+def user_pass_check(data):
+    """
+    Check for credentials in packet data
+    
+    Args:
+        packet: Packet object to check
+    
+    Returns:
+        str: The line containing credentials if found, None otherwise
+    """
     global ALERT_COUNTER, tempUserPass
     
-    words = str(raw_packet).split()
+    if not isUserCheckBoxChecked:
+        return None
+        
+    try:
+        # Get raw data (already a string)
+        raw_data = data
+        
+        if not raw_data or len(raw_data) < 3:
+            return None
+            
+        if DEBUG_MODE:
+            print("\n=== User/Password Check ===")
+            print(f"Raw data type: {type(raw_data)}")
+            print(f"Raw data length: {len(raw_data)}")
+            print(f"First 100 chars: {raw_data[:100]}")
+            print(f"Available keywords: {len(USER_KEYWORDS)} user, {len(PASS_KEYWORDS)} pass")
+            
+        # Split into lines
+        data = raw_data.splitlines()
+        
+        # If no lines were found, try to split by spaces
+        if len(data) <= 1:
+            data = raw_data.split()
+        
+        # Check each line/word for matches
+        for line in data:
+            line_lower = line.lower()
+            
+            # Check for user keywords using substring (most reliable method)
+            for user_keyword in USER_KEYWORDS:
+                if user_keyword.lower() in line_lower:
+                    if DEBUG_MODE:
+                        print(f"Found user keyword match: '{user_keyword}' in '{line}'")
+                    return line
+                    
+            # Check for password keywords
+            for pass_keyword in PASS_KEYWORDS:
+                if pass_keyword.lower() in line_lower:
+                    if DEBUG_MODE:
+                        print(f"Found password keyword match: '{pass_keyword}' in '{line}'")
+                    return line
+                    
+        # Try KMP pattern matching as a fallback for more complex cases
+        for line in data:
+            for user_keyword in USER_KEYWORDS:
+                if kmp(line.lower(), user_keyword.lower()) != -1:
+                    if DEBUG_MODE:
+                        print(f"Found user keyword with KMP: '{user_keyword}' in '{line}'")
+                    return line
+                    
+            for pass_keyword in PASS_KEYWORDS:
+                if kmp(line.lower(), pass_keyword.lower()) != -1:
+                    if DEBUG_MODE:
+                        print(f"Found password keyword with KMP: '{pass_keyword}' in '{line}'")
+                    return line
+                    
+    except Exception as e:
+        logging.error(f"Error in user_pass_check: {str(e)}")
+        return None
 
-    # print("user pass fun called")
-    data = raw_packet.rawData.splitlines()
-    # print(data)
-    # print(packet[Raw].load.decode('utf-8','ignore'))
-    for line in data:
-        for user_keyword in USER_KEYWORDS:
-            if user_keyword in line:
-                return line
-
-        for pass_keyword in PASS_KEYWORDS:
-            if pass_keyword in line:
-                return line
+    
+    return None
         
 
 # credit_card_check()
 #
 # Checks whether or not credit card numbers have been sent in-the-clear. If it believes
 # there are credentials in the packet,
-def credit_card_check(in_packet):
-    data = in_packet.rawData.splitlines()
-
+def credit_card_check(data):
     for line in data:
 
         visa_num = findall('4[0-9]{12}(?:[0-9]{3})?', str(line))
@@ -327,17 +386,61 @@ def credit_card_check(in_packet):
 
 # sniff_packet()
 #
-# Sniffs a given packet. Will call on four functions to protect against: nmap
-# stealthy scans, Nikto scans, Shellshock attacks, and credentials sent
-# in-the-clear.
+# Sniffs a given packet. Will call on various functions to protect against: nmap
+# stealthy scans, Nikto scans, Shellshock attacks, credentials sent
+# in-the-clear, and credit card information.
 def sniff_packet(in_packet):
-    temp_packet = Packet(in_packet)
-
-    scan_check(temp_packet)
-    nikto_check(temp_packet)
-    shellshock_check(temp_packet)
-    user_pass_check(temp_packet)
-    credit_card_check(temp_packet)
+    try:
+        # Create a packet object for analysis
+        temp_packet = Packet(in_packet)
+        
+        # Debug information
+        if DEBUG_MODE:
+            print(f"\n===== Analyzing New Packet =====")
+            print(f"Source IP: {temp_packet.srcIP}")
+            print(f"Destination IP: {temp_packet.dstIP}")
+            print(f"Protocol: {temp_packet.protocol}")
+            if temp_packet.rawData:
+                print(f"Has Raw Data: Yes ({len(temp_packet.rawData)} bytes)")
+            else:
+                print("Has Raw Data: No")
+        
+        # Only check enabled security checks
+        results = []
+        
+        # Run all security checks if they're enabled
+        if isScanAttackCheckBoxChecked:
+            scan_result = scan_check(temp_packet)
+            if scan_result: results.append(("Scan Attack", scan_result))
+            
+        # Nikto scan check
+        nikto_result = nikto_check(temp_packet)
+        if nikto_result: results.append(("Nikto Scan", nikto_result))
+        
+        # Shellshock vulnerability check
+        shellshock_result = shellshock_check(temp_packet)
+        if shellshock_result: results.append(("Shellshock", shellshock_result))
+        
+        # User/password credential check
+        if isUserCheckBoxChecked:
+            user_pass_result = user_pass_check(temp_packet)
+            if user_pass_result: results.append(("Credentials", user_pass_result))
+        
+        # Credit card check
+        if isCreditCheckBoxChecked:
+            credit_card_result = credit_card_check(temp_packet)
+            if credit_card_result: results.append(("Credit Card", credit_card_result))
+        
+        # Show results if any threats were detected
+        if results and DEBUG_MODE:
+            print("\n----- Security Alerts Detected -----")
+            for alert_type, alert_data in results:
+                print(f"{alert_type}: {alert_data}")
+        
+        return results
+    except Exception as e:
+        print(f"Error in sniff_packet: {str(e)}")
+        return []
 
 
 def packet_callback(in_packet):
@@ -657,6 +760,159 @@ class SnifferMainWindow(Ui_MainWindow,QtWidgets.QMainWindow):
         msg.setWindowTitle("关于我")
         msg.setText("作者: xxxxx\nEmail:xxxx.com")
         msg.exec()
+        
+    def check_rules_in_data(self, data, packet):
+        """
+        Check if any loaded rules/keywords are present in the provided data
+        
+        Args:
+            data: String data to check against loaded rules
+            packet: Network packet being analyzed
+        """
+        if not data:
+            return
+            
+        global count
+            
+        # Convert data to lowercase for case-insensitive matching
+        data_lower = data.lower()
+        
+        # Create lists to store matches
+        matches = {
+            "Nikto Keywords": [],
+            "HTTP Keywords": [],
+            "Shellshock Keywords": [],
+            "User Keywords": [],
+            "Password Keywords": []
+        }
+        
+        # Helper function to add attack info to table
+        def add_attack_info(attack_type, result_data=None):
+            row = self.tableWidgetAttackInfo.rowCount()
+            self.tableWidgetAttackInfo.insertRow(row)
+            self.tableWidgetAttackInfo.setItem(row, 0, QtWidgets.QTableWidgetItem(str(count)))
+            self.tableWidgetAttackInfo.setItem(row, 1, QtWidgets.QTableWidgetItem(packet[IP].src))
+            self.tableWidgetAttackInfo.setItem(row, 2, QtWidgets.QTableWidgetItem(packet[IP].dst))
+            self.tableWidgetAttackInfo.setItem(row, 3, QtWidgets.QTableWidgetItem(attack_type))
+            if result_data:
+                self.tableWidgetAttackInfo.setItem(row, 4, QtWidgets.QTableWidgetItem(str(result_data)))
+
+        # Check for various attack types based on checkbox states
+        if isDDOSCheckBoxChecked:
+            # DDOS detection logic would go here
+            pass
+            
+        if isForkBoomCheckBoxChecked:
+            result = shellshock_check(data_lower)
+            if result is not None:
+                add_attack_info("fork boom!!!", result)
+
+        if isUserCheckBoxChecked:
+            result = user_pass_check(data_lower)
+            if result is not None:
+                add_attack_info("username or passwd leak", result)
+
+        if isCreditCheckBoxChecked:
+            result = credit_card_check(data_lower)
+            if result is not None:
+                add_attack_info("credit card leak", result)
+
+        if isScanAttackCheckBoxChecked:
+            result = scan_check(packet)
+            if result is not None:
+                add_attack_info("scan check", result)
+
+        if isPicFilenameCheckBoxChecked:
+            result = get_pic_filename(data_lower)
+            if result is not None:
+                add_attack_info("Picture found", result)
+                
+        if isTxtFilenameCheckBoxChecked:
+            result = get_txt_filename(data_lower)
+            if result is not None:
+                add_attack_info("TXT file found", result)
+                
+        # Check for keyword matches - optimized loops
+        keyword_categories = [
+            (NIKTO_KEYWORDS, "Nikto Keywords"),
+            (HTTP_AUTH_KEYWD, "HTTP Keywords"),
+            (SHOCK_KEYWORDS, "Shellshock Keywords"),
+            (USER_KEYWORDS, "User Keywords"),
+            (PASS_KEYWORDS, "Password Keywords")
+        ]
+        
+        for keywords, category in keyword_categories:
+            for keyword in keywords:
+                if keyword.lower() in data_lower:
+                    matches[category].append(keyword)
+        
+        # Check if any matches were found
+        found_matches = any(keywords for keywords in matches.values())
+                
+        if found_matches:
+            # Create a scrollable widget to display matches
+            try:
+                match_dialog = QDialog(self)
+                match_dialog.setWindowTitle("Rules Matched in Packet Data")
+                match_dialog.setMinimumWidth(600)
+                match_dialog.setMinimumHeight(400)
+            
+                layout = QVBoxLayout(match_dialog)
+            
+                # Create a text area to display matches
+                text_edit = QTextEdit()
+                text_edit.setReadOnly(True)
+                text_edit.setFont(QFont("Monospace", 10))
+                text_edit.append("<h2>The following rules were found in the packet data:</h2>")
+            
+                # Add each category of matches
+                for category, keywords in matches.items():
+                    if keywords:
+                        text_edit.append(f"<h3>{category}:</h3>")
+                        text_edit.append("<ul>")
+                        for keyword in keywords:
+                            text_edit.append(f"<li><b>{keyword}</b></li>")
+                        text_edit.append("</ul>")
+            
+                # Add the highlighted data - optimized highlighting
+                text_edit.append("<h3>Data containing matches:</h3>")
+
+                
+                # More efficient HTML creation for highlighting
+                import re
+                highlighted_data = data
+                all_keywords = []
+                for keywords in matches.values():
+                    all_keywords.extend(keywords)
+                
+                if all_keywords:
+                    # Sort keywords by length (longest first) to avoid nested highlights
+                    all_keywords.sort(key=len, reverse=True)
+                    
+                    # Create a pattern that matches any of the keywords
+                    pattern = '|'.join(re.escape(keyword) for keyword in all_keywords)
+                    
+                    # Replace all matches with highlighted versions
+                    highlighted_data = re.sub(
+                        f'({pattern})',
+                        r'<span style="background-color: yellow;">\1</span>',
+                        highlighted_data,
+                        flags=re.IGNORECASE
+                    )
+            
+                text_edit.append(f"<pre>{highlighted_data}</pre>")
+            
+                layout.addWidget(text_edit)
+            
+                # Add OK button
+                button_box = QDialogButtonBox(QDialogButtonBox.Ok)
+                button_box.accepted.connect(match_dialog.accept)
+                layout.addWidget(button_box)
+            
+                match_dialog.setLayout(layout)
+                match_dialog.exec_()
+            except Exception as e:
+                print(f"Error displaying matches: {e}")
 
     #统计数据菜单
     def statisticsMenu(self):
@@ -880,81 +1136,7 @@ class SnifferMainWindow(Ui_MainWindow,QtWidgets.QMainWindow):
 
                 temp_packet = Packet(packet)
 
-                if isDDOSCheckBoxChecked:
-                    a = 1
-                    #print("Hll")
-                    # DDOS
-                if isForkBoomCheckBoxChecked:
-                    data = shellshock_check(temp_packet)
-                    if data is not None:
-                        row = self.tableWidgetAttackInfo.rowCount()
-                        self.tableWidgetAttackInfo.insertRow(row)
-                        self.tableWidgetAttackInfo.setItem(row,0, QtWidgets.QTableWidgetItem(str(count)))
-                        self.tableWidgetAttackInfo.setItem(row,1, QtWidgets.QTableWidgetItem(packet[IP].src))
-                        self.tableWidgetAttackInfo.setItem(row,2, QtWidgets.QTableWidgetItem(packet[IP].dst))
-                        self.tableWidgetAttackInfo.setItem(row,3, QtWidgets.QTableWidgetItem(str("fork boom!!!")))
-
-                if isUserCheckBoxChecked:
-                    # print(isUserCheckBoxChecked)
-                    # print("Hello, user check enable")
-                    data = user_pass_check(temp_packet)
-                    if data is not None:
-                        row = self.tableWidgetAttackInfo.rowCount()
-                        self.tableWidgetAttackInfo.insertRow(row)
-                        self.tableWidgetAttackInfo.setItem(row,0, QtWidgets.QTableWidgetItem(str(count)))
-                        self.tableWidgetAttackInfo.setItem(row,1, QtWidgets.QTableWidgetItem(packet[IP].src))
-                        self.tableWidgetAttackInfo.setItem(row,2, QtWidgets.QTableWidgetItem(packet[IP].dst))
-                        self.tableWidgetAttackInfo.setItem(row,3, QtWidgets.QTableWidgetItem(str("username or passwd leak")))
-                        self.tableWidgetAttackInfo.setItem(row,4, QtWidgets.QTableWidgetItem(str(data)))
-
-                if isCreditCheckBoxChecked:
-                    # print("Hello, credit check enable")
-                    data = credit_card_check(temp_packet)
-                    if data is not None:
-                        row = self.tableWidgetAttackInfo.rowCount()
-                        self.tableWidgetAttackInfo.insertRow(row)
-                        self.tableWidgetAttackInfo.setItem(row,0, QtWidgets.QTableWidgetItem(str(count)))
-                        self.tableWidgetAttackInfo.setItem(row,1, QtWidgets.QTableWidgetItem(packet[IP].src))
-                        self.tableWidgetAttackInfo.setItem(row,2, QtWidgets.QTableWidgetItem(packet[IP].dst))
-                        self.tableWidgetAttackInfo.setItem(row,3, QtWidgets.QTableWidgetItem(str("credit card leak")))
-                        self.tableWidgetAttackInfo.setItem(row,4, QtWidgets.QTableWidgetItem(str(data)))
-
-                if isScanAttackCheckBoxChecked:
-                    # print("Hello, scan check enable")
-                    data = scan_check(temp_packet)
-                    if data is not None:
-                        row = self.tableWidgetAttackInfo.rowCount()
-                        self.tableWidgetAttackInfo.insertRow(row)
-                        self.tableWidgetAttackInfo.setItem(row,0, QtWidgets.QTableWidgetItem(str(count)))
-                        self.tableWidgetAttackInfo.setItem(row,1, QtWidgets.QTableWidgetItem(packet[IP].src))
-                        self.tableWidgetAttackInfo.setItem(row,2, QtWidgets.QTableWidgetItem(packet[IP].dst))
-                        self.tableWidgetAttackInfo.setItem(row,3, QtWidgets.QTableWidgetItem(str("scan check")))
-                        self.tableWidgetAttackInfo.setItem(row,4, QtWidgets.QTableWidgetItem(str(data)))
-
-                if isPicFilenameCheckBoxChecked:
-                    # print("Hello, scan check enable")
-                    data = get_pic_filename(temp_packet)
-                    if data is not None:
-                        row = self.tableWidgetAttackInfo.rowCount()
-                        self.tableWidgetAttackInfo.insertRow(row)
-                        self.tableWidgetAttackInfo.setItem(row,0, QtWidgets.QTableWidgetItem(str(count)))
-                        self.tableWidgetAttackInfo.setItem(row,1, QtWidgets.QTableWidgetItem(packet[IP].src))
-                        self.tableWidgetAttackInfo.setItem(row,2, QtWidgets.QTableWidgetItem(packet[IP].dst))
-                        self.tableWidgetAttackInfo.setItem(row,3, QtWidgets.QTableWidgetItem(str("TXT file found")))
-                        self.tableWidgetAttackInfo.setItem(row,4, QtWidgets.QTableWidgetItem(str(data)))
-                        
-                if isTxtFilenameCheckBoxChecked:
-                    # print("Hello, scan check enable")
-                    data = get_txt_filename(temp_packet)
-                    if data is not None:
-                        row = self.tableWidgetAttackInfo.rowCount()
-                        self.tableWidgetAttackInfo.insertRow(row)
-                        self.tableWidgetAttackInfo.setItem(row,0, QtWidgets.QTableWidgetItem(str(count)))
-                        self.tableWidgetAttackInfo.setItem(row,1, QtWidgets.QTableWidgetItem(packet[IP].src))
-                        self.tableWidgetAttackInfo.setItem(row,2, QtWidgets.QTableWidgetItem(packet[IP].dst))
-                        self.tableWidgetAttackInfo.setItem(row,3, QtWidgets.QTableWidgetItem(str("Picture found")))
-                        self.tableWidgetAttackInfo.setItem(row,4, QtWidgets.QTableWidgetItem(str(data)))
-                        
+    
                 #HTTP
                 if packet[TCP].dport == 80 or packet[TCP].sport == 80:
                     self.tableWidget.setItem(row,4, QtWidgets.QTableWidgetItem('HTTP'))
@@ -1626,12 +1808,21 @@ class SnifferMainWindow(Ui_MainWindow,QtWidgets.QMainWindow):
         if packet.haslayer('Raw'):
             # raw = QtWidgets.QTreeWidgetItem(self.treeWidget)
             # raw.setText(0,'Raw：%s' % packet[Raw].load.decode('utf-8','ignore'))
-            self.textBrowserRaw.append('Raw：%s' % packet[Raw].load.decode('utf-8','ignore'))
+            raw_data = packet[Raw].load.decode('utf-8','ignore')
+            self.textBrowserRaw.append('Raw：%s' % raw_data)
+            
+            # Check if any loaded rules match the packet data
+            self.check_rules_in_data(raw_data, packet)
 
         if packet.haslayer('Padding'):
             # padding = QtWidgets.QTreeWidgetItem(self.treeWidget)
             # padding.setText(0,'Padding：%s' % packet[Padding].load.decode('utf-8','ignore'))
-            self.textBrowserRaw.append('Padding：%s' % packet[Padding].load.decode('utf-8','ignore'))
+            padding_data = packet[Padding].load.decode('utf-8','ignore')
+            self.textBrowserRaw.append('Padding：%s' % padding_data)
+            
+            # Check if any loaded rules match the padding data
+            self.check_rules_in_data(padding_data)
+
 
         self.textBrowserDump.clear()
         f = open('hexdump.tmp','w')
