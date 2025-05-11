@@ -4,9 +4,10 @@
 import os
 import sys
 import subprocess
+import signal
 from PyQt5.QtWidgets import (QApplication, QDialog, QVBoxLayout, QHBoxLayout, 
                             QLabel, QPushButton, QGroupBox, QMessageBox)
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtGui import QFont, QIcon
 
 class AppSelectorDialog(QDialog):
@@ -124,16 +125,31 @@ class AppSelectorDialog(QDialog):
             # Start the IDS main application
             if sys.platform.startswith('win'):
                 # Windows
-                subprocess.Popen(["python", script_path], creationflags=subprocess.CREATE_NEW_CONSOLE)
+                self.current_process = subprocess.Popen(["python", script_path], creationflags=subprocess.CREATE_NEW_CONSOLE)
             else:
                 # Linux/Mac
-                subprocess.Popen(["python3", script_path])
+                self.current_process = subprocess.Popen(["python3", script_path])
             
-            # Close the selector dialog
-            self.accept()
+            # Set up a timer to check if the process is still running
+            self.process_timer = QTimer(self)
+            self.process_timer.timeout.connect(self.check_ids_process)
+            self.process_timer.start(500)  # Check every 500 ms
+            
+            # Hide this window but don't close it
+            self.hide()
             
         except Exception as e:
+            self.show()  # Ensure this window is visible
             QMessageBox.critical(self, "启动失败", f"启动入侵检测系统失败: {str(e)}")
+    
+    def check_ids_process(self):
+        """Check if the IDS process is still running"""
+        if hasattr(self, 'current_process'):
+            # Check if process has terminated
+            if self.current_process.poll() is not None:
+                # Process has ended
+                self.process_timer.stop()
+                self.show()  # Show this dialog again
     
     def launch_rules_manager(self):
         """Launch the rules manager application"""
@@ -144,18 +160,34 @@ class AppSelectorDialog(QDialog):
             # Start the rules manager application with user role argument
             args = ["--role", self.user_role]
             
+            # Start the rules manager
             if sys.platform.startswith('win'):
                 # Windows
-                subprocess.Popen(["python", script_path] + args, creationflags=subprocess.CREATE_NEW_CONSOLE)
+                self.current_process = subprocess.Popen(["python", script_path] + args, creationflags=subprocess.CREATE_NEW_CONSOLE)
             else:
                 # Linux/Mac
-                subprocess.Popen(["python3", script_path] + args)
+                self.current_process = subprocess.Popen(["python3", script_path] + args)
             
-            # Close the selector dialog
-            self.accept()
+            # Set up a timer to check if the process is still running
+            self.process_timer = QTimer(self)
+            self.process_timer.timeout.connect(self.check_rules_process)
+            self.process_timer.start(500)  # Check every 500 ms
+            
+            # Hide this window but don't close it
+            self.hide()
             
         except Exception as e:
+            self.show()  # Ensure this window is visible
             QMessageBox.critical(self, "启动失败", f"启动规则管理器失败: {str(e)}")
+    
+    def check_rules_process(self):
+        """Check if the rules manager process is still running"""
+        if hasattr(self, 'current_process'):
+            # Check if process has terminated
+            if self.current_process.poll() is not None:
+                # Process has ended
+                self.process_timer.stop()
+                self.show()  # Show this dialog again
 
 
 if __name__ == "__main__":
