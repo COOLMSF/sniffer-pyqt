@@ -1,0 +1,545 @@
+
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="UTF-8">
+                <title>网络安全分析报告</title>
+                <style>
+                    body { font-family: Arial, sans-serif; margin: 20px; }
+                    h1, h2 { color: #2c3e50; }
+                    table { border-collapse: collapse; width: 100%; margin-bottom: 20px; }
+                    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                    th { background-color: #f2f2f2; }
+                    tr:nth-child(even) { background-color: #f9f9f9; }
+                    .timestamp { color: #7f8c8d; font-size: 14px; }
+                    .alert { color: #e74c3c; }
+                </style>
+            </head>
+            <body>
+                <h1>网络安全分析报告</h1>
+                <p class="timestamp">生成时间: 2025-05-11 15:02:04</p>
+                
+                <h2>摘要</h2>
+                <ul>
+                    <li>总共捕获数据包: <strong>110</strong></li>
+                    <li>检测到攻击: <strong>0</strong></li>
+                </ul>
+            
+                <h2>捕获的数据包</h2>
+                <p>显示前 50 个数据包 (共 110 个)</p>
+<table>
+<tr>
+<th>序号</th>
+<th>时间</th>
+<th>源地址</th>
+<th>目的地址</th>
+<th>协议</th>
+<th>长度</th>
+<th>信息</th>
+<th>是否加密</th>
+</tr>
+<tr>
+<td>1</td>
+<td>0.9352939</td>
+<td>192.168.37.133</td>
+<td>216.86.162.5</td>
+<td>TCP</td>
+<td>74</td>
+<td>46494 -> 30099 [SYN] Seq：4156322627 Ack：0 Win：64240</td>
+<td>False</td>
+</tr>
+<tr>
+<td>2</td>
+<td>2.6209924</td>
+<td>216.86.162.5</td>
+<td>192.168.37.133</td>
+<td>TCP</td>
+<td>60</td>
+<td>30099 -> 46494 [ACK,RST] Seq：378893388 Ack：4156322628 Win：64240</td>
+<td>False</td>
+</tr>
+<tr>
+<td>3</td>
+<td>2.6272058</td>
+<td>192.168.37.133</td>
+<td>192.168.37.1</td>
+<td>TCP</td>
+<td>122</td>
+<td>22 -> 50344 [ACK,PSH] Seq：771591527 Ack：2569957329 Win：16108</td>
+<td>False</td>
+</tr>
+<tr>
+<td>4</td>
+<td>2.6300063</td>
+<td>192.168.37.1</td>
+<td>192.168.37.133</td>
+<td>TCP</td>
+<td>146</td>
+<td>50344 -> 22 [ACK,PSH] Seq：2569957329 Ack：771591595 Win：4095</td>
+<td>False</td>
+</tr>
+<tr>
+<td>5</td>
+<td>2.6300514</td>
+<td>192.168.37.133</td>
+<td>192.168.37.1</td>
+<td>TCP</td>
+<td>54</td>
+<td>22 -> 50344 [ACK] Seq：771591595 Ack：2569957421 Win：16108</td>
+<td>False</td>
+</tr>
+<tr>
+<td>6</td>
+<td>2.6327152</td>
+<td>192.168.37.133</td>
+<td>192.168.37.1</td>
+<td>TCP</td>
+<td>106</td>
+<td>22 -> 50344 [ACK,PSH] Seq：771591595 Ack：2569957421 Win：16108</td>
+<td>False</td>
+</tr>
+<tr>
+<td>7</td>
+<td>2.6344240</td>
+<td>192.168.37.133</td>
+<td>192.168.37.1</td>
+<td>TCP</td>
+<td>106</td>
+<td>22 -> 50344 [ACK,PSH] Seq：771591647 Ack：2569957421 Win：16108</td>
+<td>False</td>
+</tr>
+<tr>
+<td>8</td>
+<td>2.6346328</td>
+<td>192.168.37.1</td>
+<td>192.168.37.133</td>
+<td>TCP</td>
+<td>60</td>
+<td>50344 -> 22 [ACK] Seq：2569957421 Ack：771591699 Win：4095</td>
+<td>False</td>
+</tr>
+<tr>
+<td>9</td>
+<td>2.6368401</td>
+<td>192.168.37.1</td>
+<td>192.168.37.133</td>
+<td>TCP</td>
+<td>114</td>
+<td>50344 -> 22 [ACK,PSH] Seq：2569957421 Ack：771591699 Win：4095</td>
+<td>False</td>
+</tr>
+<tr>
+<td>10</td>
+<td>2.6395838</td>
+<td>192.168.37.133</td>
+<td>192.168.37.1</td>
+<td>TCP</td>
+<td>114</td>
+<td>22 -> 50344 [ACK,PSH] Seq：771591699 Ack：2569957481 Win：16108</td>
+<td>False</td>
+</tr>
+<tr>
+<td>11</td>
+<td>2.6423097</td>
+<td>192.168.37.1</td>
+<td>192.168.37.133</td>
+<td>TCP</td>
+<td>130</td>
+<td>50344 -> 22 [ACK,PSH] Seq：2569957481 Ack：771591759 Win：4094</td>
+<td>False</td>
+</tr>
+<tr>
+<td>12</td>
+<td>2.6446588</td>
+<td>192.168.37.133</td>
+<td>192.168.37.1</td>
+<td>TCP</td>
+<td>114</td>
+<td>22 -> 50344 [ACK,PSH] Seq：771591759 Ack：2569957557 Win：16108</td>
+<td>False</td>
+</tr>
+<tr>
+<td>13</td>
+<td>2.6472242</td>
+<td>192.168.37.1</td>
+<td>192.168.37.133</td>
+<td>TCP</td>
+<td>114</td>
+<td>50344 -> 22 [ACK,PSH] Seq：2569957557 Ack：771591819 Win：4094</td>
+<td>False</td>
+</tr>
+<tr>
+<td>14</td>
+<td>2.6495361</td>
+<td>192.168.37.133</td>
+<td>192.168.37.1</td>
+<td>TCP</td>
+<td>114</td>
+<td>22 -> 50344 [ACK,PSH] Seq：771591819 Ack：2569957617 Win：16108</td>
+<td>False</td>
+</tr>
+<tr>
+<td>15</td>
+<td>2.6522033</td>
+<td>192.168.37.1</td>
+<td>192.168.37.133</td>
+<td>TCP</td>
+<td>130</td>
+<td>50344 -> 22 [ACK,PSH] Seq：2569957617 Ack：771591879 Win：4094</td>
+<td>False</td>
+</tr>
+<tr>
+<td>16</td>
+<td>2.6555784</td>
+<td>192.168.37.133</td>
+<td>192.168.37.1</td>
+<td>TCP</td>
+<td>114</td>
+<td>22 -> 50344 [ACK,PSH] Seq：771591879 Ack：2569957693 Win：16108</td>
+<td>False</td>
+</tr>
+<tr>
+<td>17</td>
+<td>2.6578865</td>
+<td>192.168.37.1</td>
+<td>192.168.37.133</td>
+<td>TCP</td>
+<td>114</td>
+<td>50344 -> 22 [ACK,PSH] Seq：2569957693 Ack：771591939 Win：4094</td>
+<td>False</td>
+</tr>
+<tr>
+<td>18</td>
+<td>2.6596334</td>
+<td>192.168.37.133</td>
+<td>192.168.37.1</td>
+<td>TCP</td>
+<td>114</td>
+<td>22 -> 50344 [ACK,PSH] Seq：771591939 Ack：2569957753 Win：16108</td>
+<td>False</td>
+</tr>
+<tr>
+<td>19</td>
+<td>2.6625135</td>
+<td>192.168.37.1</td>
+<td>192.168.37.133</td>
+<td>TCP</td>
+<td>130</td>
+<td>50344 -> 22 [ACK,PSH] Seq：2569957753 Ack：771591999 Win：4093</td>
+<td>False</td>
+</tr>
+<tr>
+<td>20</td>
+<td>2.6648512</td>
+<td>192.168.37.133</td>
+<td>192.168.37.1</td>
+<td>TCP</td>
+<td>114</td>
+<td>22 -> 50344 [ACK,PSH] Seq：771591999 Ack：2569957829 Win：16108</td>
+<td>False</td>
+</tr>
+<tr>
+<td>21</td>
+<td>2.6670377</td>
+<td>192.168.37.1</td>
+<td>192.168.37.133</td>
+<td>TCP</td>
+<td>114</td>
+<td>50344 -> 22 [ACK,PSH] Seq：2569957829 Ack：771592059 Win：4093</td>
+<td>False</td>
+</tr>
+<tr>
+<td>22</td>
+<td>2.6694436</td>
+<td>192.168.37.133</td>
+<td>192.168.37.1</td>
+<td>TCP</td>
+<td>114</td>
+<td>22 -> 50344 [ACK,PSH] Seq：771592059 Ack：2569957889 Win：16108</td>
+<td>False</td>
+</tr>
+<tr>
+<td>23</td>
+<td>2.6724091</td>
+<td>192.168.37.1</td>
+<td>192.168.37.133</td>
+<td>TCP</td>
+<td>130</td>
+<td>50344 -> 22 [ACK,PSH] Seq：2569957889 Ack：771592119 Win：4093</td>
+<td>False</td>
+</tr>
+<tr>
+<td>24</td>
+<td>2.6748512</td>
+<td>192.168.37.133</td>
+<td>192.168.37.1</td>
+<td>TCP</td>
+<td>114</td>
+<td>22 -> 50344 [ACK,PSH] Seq：771592119 Ack：2569957965 Win：16108</td>
+<td>False</td>
+</tr>
+<tr>
+<td>25</td>
+<td>2.6768978</td>
+<td>192.168.37.1</td>
+<td>192.168.37.133</td>
+<td>TCP</td>
+<td>114</td>
+<td>50344 -> 22 [ACK,PSH] Seq：2569957965 Ack：771592179 Win：4093</td>
+<td>False</td>
+</tr>
+<tr>
+<td>26</td>
+<td>2.6789062</td>
+<td>192.168.37.133</td>
+<td>192.168.37.1</td>
+<td>TCP</td>
+<td>114</td>
+<td>22 -> 50344 [ACK,PSH] Seq：771592179 Ack：2569958025 Win：16108</td>
+<td>False</td>
+</tr>
+<tr>
+<td>27</td>
+<td>2.6814020</td>
+<td>192.168.37.1</td>
+<td>192.168.37.133</td>
+<td>TCP</td>
+<td>130</td>
+<td>50344 -> 22 [ACK,PSH] Seq：2569958025 Ack：771592239 Win：4092</td>
+<td>False</td>
+</tr>
+<tr>
+<td>28</td>
+<td>2.6825919</td>
+<td>192.168.37.133</td>
+<td>192.168.37.1</td>
+<td>TCP</td>
+<td>106</td>
+<td>22 -> 50344 [ACK,PSH] Seq：771592239 Ack：2569958101 Win：16108</td>
+<td>False</td>
+</tr>
+<tr>
+<td>29</td>
+<td>2.6857588</td>
+<td>192.168.37.133</td>
+<td>192.168.37.1</td>
+<td>TCP</td>
+<td>106</td>
+<td>22 -> 50344 [ACK,PSH] Seq：771592291 Ack：2569958101 Win：16108</td>
+<td>False</td>
+</tr>
+<tr>
+<td>30</td>
+<td>2.6860676</td>
+<td>192.168.37.1</td>
+<td>192.168.37.133</td>
+<td>TCP</td>
+<td>60</td>
+<td>50344 -> 22 [ACK] Seq：2569958101 Ack：771592343 Win：4092</td>
+<td>False</td>
+</tr>
+<tr>
+<td>31</td>
+<td>2.6882300</td>
+<td>192.168.37.1</td>
+<td>192.168.37.133</td>
+<td>TCP</td>
+<td>114</td>
+<td>50344 -> 22 [ACK,PSH] Seq：2569958101 Ack：771592343 Win：4092</td>
+<td>False</td>
+</tr>
+<tr>
+<td>32</td>
+<td>2.6903331</td>
+<td>192.168.37.133</td>
+<td>192.168.37.1</td>
+<td>TCP</td>
+<td>114</td>
+<td>22 -> 50344 [ACK,PSH] Seq：771592343 Ack：2569958161 Win：16108</td>
+<td>False</td>
+</tr>
+<tr>
+<td>33</td>
+<td>2.6924002</td>
+<td>192.168.37.1</td>
+<td>192.168.37.133</td>
+<td>TCP</td>
+<td>130</td>
+<td>50344 -> 22 [ACK,PSH] Seq：2569958161 Ack：771592403 Win：4092</td>
+<td>False</td>
+</tr>
+<tr>
+<td>34</td>
+<td>2.6946297</td>
+<td>192.168.37.133</td>
+<td>192.168.37.1</td>
+<td>TCP</td>
+<td>114</td>
+<td>22 -> 50344 [ACK,PSH] Seq：771592403 Ack：2569958237 Win：16108</td>
+<td>False</td>
+</tr>
+<tr>
+<td>35</td>
+<td>2.6967299</td>
+<td>192.168.37.1</td>
+<td>192.168.37.133</td>
+<td>TCP</td>
+<td>114</td>
+<td>50344 -> 22 [ACK,PSH] Seq：2569958237 Ack：771592463 Win：4092</td>
+<td>False</td>
+</tr>
+<tr>
+<td>36</td>
+<td>2.6990342</td>
+<td>192.168.37.133</td>
+<td>192.168.37.1</td>
+<td>TCP</td>
+<td>114</td>
+<td>22 -> 50344 [ACK,PSH] Seq：771592463 Ack：2569958297 Win：16108</td>
+<td>False</td>
+</tr>
+<tr>
+<td>37</td>
+<td>2.7017517</td>
+<td>192.168.37.1</td>
+<td>192.168.37.133</td>
+<td>TCP</td>
+<td>130</td>
+<td>50344 -> 22 [ACK,PSH] Seq：2569958297 Ack：771592523 Win：4091</td>
+<td>False</td>
+</tr>
+<tr>
+<td>38</td>
+<td>2.7047145</td>
+<td>192.168.37.133</td>
+<td>192.168.37.1</td>
+<td>TCP</td>
+<td>114</td>
+<td>22 -> 50344 [ACK,PSH] Seq：771592523 Ack：2569958373 Win：16108</td>
+<td>False</td>
+</tr>
+<tr>
+<td>39</td>
+<td>2.7069294</td>
+<td>192.168.37.1</td>
+<td>192.168.37.133</td>
+<td>TCP</td>
+<td>114</td>
+<td>50344 -> 22 [ACK,PSH] Seq：2569958373 Ack：771592583 Win：4091</td>
+<td>False</td>
+</tr>
+<tr>
+<td>40</td>
+<td>2.7089517</td>
+<td>192.168.37.133</td>
+<td>192.168.37.1</td>
+<td>TCP</td>
+<td>114</td>
+<td>22 -> 50344 [ACK,PSH] Seq：771592583 Ack：2569958433 Win：16108</td>
+<td>False</td>
+</tr>
+<tr>
+<td>41</td>
+<td>2.7117383</td>
+<td>192.168.37.1</td>
+<td>192.168.37.133</td>
+<td>TCP</td>
+<td>130</td>
+<td>50344 -> 22 [ACK,PSH] Seq：2569958433 Ack：771592643 Win：4091</td>
+<td>False</td>
+</tr>
+<tr>
+<td>42</td>
+<td>2.7137783</td>
+<td>192.168.37.133</td>
+<td>192.168.37.1</td>
+<td>TCP</td>
+<td>114</td>
+<td>22 -> 50344 [ACK,PSH] Seq：771592643 Ack：2569958509 Win：16108</td>
+<td>False</td>
+</tr>
+<tr>
+<td>43</td>
+<td>2.7167025</td>
+<td>192.168.37.1</td>
+<td>192.168.37.133</td>
+<td>TCP</td>
+<td>114</td>
+<td>50344 -> 22 [ACK,PSH] Seq：2569958509 Ack：771592703 Win：4091</td>
+<td>False</td>
+</tr>
+<tr>
+<td>44</td>
+<td>2.7189200</td>
+<td>192.168.37.133</td>
+<td>192.168.37.1</td>
+<td>TCP</td>
+<td>114</td>
+<td>22 -> 50344 [ACK,PSH] Seq：771592703 Ack：2569958569 Win：16108</td>
+<td>False</td>
+</tr>
+<tr>
+<td>45</td>
+<td>2.7231252</td>
+<td>192.168.37.1</td>
+<td>192.168.37.133</td>
+<td>TCP</td>
+<td>130</td>
+<td>50344 -> 22 [ACK,PSH] Seq：2569958569 Ack：771592763 Win：4090</td>
+<td>False</td>
+</tr>
+<tr>
+<td>46</td>
+<td>2.7258387</td>
+<td>192.168.37.133</td>
+<td>192.168.37.1</td>
+<td>TCP</td>
+<td>114</td>
+<td>22 -> 50344 [ACK,PSH] Seq：771592763 Ack：2569958645 Win：16108</td>
+<td>False</td>
+</tr>
+<tr>
+<td>47</td>
+<td>2.7288160</td>
+<td>192.168.37.1</td>
+<td>192.168.37.133</td>
+<td>TCP</td>
+<td>114</td>
+<td>50344 -> 22 [ACK,PSH] Seq：2569958645 Ack：771592823 Win：4090</td>
+<td>False</td>
+</tr>
+<tr>
+<td>48</td>
+<td>2.7312601</td>
+<td>192.168.37.133</td>
+<td>192.168.37.1</td>
+<td>TCP</td>
+<td>114</td>
+<td>22 -> 50344 [ACK,PSH] Seq：771592823 Ack：2569958705 Win：16108</td>
+<td>False</td>
+</tr>
+<tr>
+<td>49</td>
+<td>2.7343662</td>
+<td>192.168.37.1</td>
+<td>192.168.37.133</td>
+<td>TCP</td>
+<td>130</td>
+<td>50344 -> 22 [ACK,PSH] Seq：2569958705 Ack：771592883 Win：4090</td>
+<td>False</td>
+</tr>
+<tr>
+<td>50</td>
+<td>2.7375395</td>
+<td>192.168.37.133</td>
+<td>192.168.37.1</td>
+<td>TCP</td>
+<td>114</td>
+<td>22 -> 50344 [ACK,PSH] Seq：771592883 Ack：2569958781 Win：16108</td>
+<td>False</td>
+</tr>
+</table>
+
+            </body>
+            </html>
+            

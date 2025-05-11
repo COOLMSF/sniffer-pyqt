@@ -1,0 +1,183 @@
+
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="UTF-8">
+                <title>网络安全分析报告</title>
+                <style>
+                    body { font-family: Arial, sans-serif; margin: 20px; }
+                    h1, h2 { color: #2c3e50; }
+                    table { border-collapse: collapse; width: 100%; margin-bottom: 20px; }
+                    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                    th { background-color: #f2f2f2; }
+                    tr:nth-child(even) { background-color: #f9f9f9; }
+                    .timestamp { color: #7f8c8d; font-size: 14px; }
+                    .alert { color: #e74c3c; }
+                </style>
+            </head>
+            <body>
+                <h1>网络安全分析报告</h1>
+                <p class="timestamp">生成时间: 2025-05-11 14:53:46</p>
+                            
+                <h2>捕获的数据包</h2>
+                <table>
+                    <tr>
+                <th>序号</th>
+<th>时间</th>
+<th>源地址</th>
+<th>目的地址</th>
+<th>协议</th>
+<th>长度</th>
+<th>信息</th>
+<th>是否加密</th>
+</tr>
+<tr>
+<td>1</td>
+<td>1.1302466</td>
+<td>192.168.37.133</td>
+<td>216.86.162.5</td>
+<td>TCP</td>
+<td>74</td>
+<td>41860 -> 30099 [SYN] Seq：1215766012 Ack：0 Win：64240</td>
+<td>False</td>
+</tr>
+<tr>
+<td>2</td>
+<td>1.1304936</td>
+<td>192.168.37.133</td>
+<td>216.86.162.5</td>
+<td>TCP</td>
+<td>74</td>
+<td>41870 -> 30099 [SYN] Seq：316218139 Ack：0 Win：64240</td>
+<td>False</td>
+</tr>
+<tr>
+<td>3</td>
+<td>2.8669536</td>
+<td>216.86.162.5</td>
+<td>192.168.37.133</td>
+<td>TCP</td>
+<td>60</td>
+<td>30099 -> 41870 [ACK,RST] Seq：743915582 Ack：316218140 Win：64240</td>
+<td>False</td>
+</tr>
+<tr>
+<td>4</td>
+<td>2.8669538</td>
+<td>216.86.162.5</td>
+<td>192.168.37.133</td>
+<td>TCP</td>
+<td>60</td>
+<td>30099 -> 41860 [ACK,RST] Seq：813653651 Ack：1215766013 Win：64240</td>
+<td>False</td>
+</tr>
+<tr>
+<td>5</td>
+<td>3.1821802</td>
+<td>192.168.37.1</td>
+<td>192.168.37.133</td>
+<td>TCP</td>
+<td>98</td>
+<td>50344 -> 22 [ACK,PSH] Seq：2569218013 Ack：766571399 Win：4094</td>
+<td>False</td>
+</tr>
+<tr>
+<td>6</td>
+<td>3.1821806</td>
+<td>192.168.37.1</td>
+<td>192.168.37.133</td>
+<td>TCP</td>
+<td>98</td>
+<td>50344 -> 22 [ACK,PSH] Seq：2569218057 Ack：766571399 Win：4094</td>
+<td>False</td>
+</tr>
+<tr>
+<td>7</td>
+<td>3.1823239</td>
+<td>192.168.37.133</td>
+<td>192.168.37.1</td>
+<td>TCP</td>
+<td>54</td>
+<td>22 -> 50344 [ACK] Seq：766571399 Ack：2569218057 Win：16108</td>
+<td>False</td>
+</tr>
+<tr>
+<td>8</td>
+<td>3.1824975</td>
+<td>192.168.37.133</td>
+<td>192.168.37.1</td>
+<td>TCP</td>
+<td>54</td>
+<td>22 -> 50344 [ACK] Seq：766571399 Ack：2569218101 Win：16108</td>
+<td>False</td>
+</tr>
+<tr>
+<td>9</td>
+<td>3.6908548</td>
+<td>192.168.37.133</td>
+<td>192.168.37.1</td>
+<td>TCP</td>
+<td>98</td>
+<td>22 -> 50344 [ACK,PSH] Seq：766571399 Ack：2569218101 Win：16108</td>
+<td>False</td>
+</tr>
+<tr>
+<td>10</td>
+<td>3.7416267</td>
+<td>192.168.37.1</td>
+<td>192.168.37.133</td>
+<td>TCP</td>
+<td>60</td>
+<td>50344 -> 22 [ACK] Seq：2569218101 Ack：766571443 Win：4094</td>
+<td>False</td>
+</tr>
+<tr>
+<td>11</td>
+<td>4.1923995</td>
+<td>192.168.37.133</td>
+<td>192.168.37.1</td>
+<td>TCP</td>
+<td>98</td>
+<td>22 -> 50344 [ACK,PSH] Seq：766571443 Ack：2569218101 Win：16108</td>
+<td>False</td>
+</tr>
+<tr>
+<td>12</td>
+<td>4.2412591</td>
+<td>192.168.37.1</td>
+<td>192.168.37.133</td>
+<td>TCP</td>
+<td>60</td>
+<td>50344 -> 22 [ACK] Seq：2569218101 Ack：766571487 Win：4094</td>
+<td>False</td>
+</tr>
+<tr>
+<td>13</td>
+<td>4.7142467</td>
+<td>192.168.37.133</td>
+<td>216.86.162.5</td>
+<td>TCP</td>
+<td>74</td>
+<td>57506 -> 30099 [SYN] Seq：3071753290 Ack：0 Win：64240</td>
+<td>False</td>
+</tr>
+<tr>
+<td>14</td>
+<td>4.7152689</td>
+<td>192.168.37.133</td>
+<td>216.86.162.5</td>
+<td>TCP</td>
+<td>74</td>
+<td>57504 -> 30099 [SYN] Seq：4254606985 Ack：0 Win：64240</td>
+<td>False</td>
+</tr>
+</table>
+
+                <h2>摘要</h2>
+                <ul>
+                    <li>总共捕获数据包: <strong>14</strong></li>
+                    <li>检测到攻击: <strong>0</strong></li>
+                </ul>
+            </body>
+            </html>
+            

@@ -26,6 +26,16 @@ from re import findall
 from scapy.all import *
 from base64 import b64decode
 from datetime import datetime
+import csv
+import json
+import pandas as pd
+import webbrowser
+# Import FPDF if needed for PDF export
+try:
+    from fpdf import FPDF
+except ImportError:
+    # FPDF will be imported when needed
+    pass
 
 # Static Global Vars
 NULL_FLAG = 0b00000000
@@ -122,20 +132,35 @@ def print_alert(scan_type, src, proto, payload):
 # be from an nmap stealth scan.
 def scan_check(in_packet):
     global ALERT_COUNTER
-
-    if in_packet.flags == NULL_FLAG:  # NULL SCAf N
-        # print("NULL scan detected from " + in_packet.srcIP)
-        # print_alert("NULL scan", in_packet.srcIP, in_packet.protocol, "aaa")
-        # print("NULL scan"+ in_packet.srcIP+ in_packet.protocol)
-        return in_packet.rawData
-    elif in_packet.flags == FIN_FLAG:  # FIN SCAN
-        # print_alert("FIN scan", in_packet.srcIP, in_packet.protocol, "aaa")
-        print("FIN scan detected")
-        return in_packet.rawData
-    elif in_packet.flags == XMAS_FLAG:  # XMAS SCAN
-        # print_alert("XMAS scan", in_packet.srcIP, in_packet.protocol, "aaa")
-        print("XMAS scan detected")
-        return in_packet.rawData
+    
+    # Check if this is a Scapy packet or our custom Packet class
+    if hasattr(in_packet, 'flags') and isinstance(in_packet.flags, int):
+        # This is our custom Packet class
+        flags_value = in_packet.flags
+        if flags_value == NULL_FLAG:  # NULL SCAN
+            return in_packet.rawData if hasattr(in_packet, 'rawData') else str(in_packet)
+        elif flags_value == FIN_FLAG:  # FIN SCAN
+            print("FIN scan detected")
+            return in_packet.rawData if hasattr(in_packet, 'rawData') else str(in_packet)
+        elif flags_value == XMAS_FLAG:  # XMAS SCAN
+            print("XMAS scan detected")
+            return in_packet.rawData if hasattr(in_packet, 'rawData') else str(in_packet)
+    elif TCP in in_packet:
+        # This is a Scapy packet
+        flags_value = in_packet[TCP].flags
+        src_ip = in_packet[IP].src if IP in in_packet else "unknown"
+        proto = in_packet.proto if hasattr(in_packet, 'proto') else 0
+        
+        if flags_value == NULL_FLAG:  # NULL SCAN
+            return str(in_packet)
+        elif flags_value == FIN_FLAG:  # FIN SCAN
+            print("FIN scan detected")
+            return str(in_packet)
+        elif flags_value == XMAS_FLAG:  # XMAS SCAN
+            print("XMAS scan detected")
+            return str(in_packet)
+    
+    return None
 
 
 # nikto_check()
@@ -784,6 +809,11 @@ class SnifferMainWindow(Ui_MainWindow,QtWidgets.QMainWindow):
         # 这里为了简单，将所有action与同一个处理函数相关联，
         # 当然也可以将他们分别与不同函数关联，实现不同的功能
         self.pdfdumpActionA.triggered.connect(self.pdfdump)
+        
+        # Connect export menu actions
+        self.actionExportCSV.triggered.connect(self.exportToCSV)
+        self.actionExportHTML.triggered.connect(self.exportToHTML)
+        self.actionExportPDF.triggered.connect(self.exportToFullReport)
 
         global count
         count = 0
@@ -1150,6 +1180,349 @@ class SnifferMainWindow(Ui_MainWindow,QtWidgets.QMainWindow):
         packets = scapy.plist.PacketList(self.packetList)
         wrpcap(path,packets)
         QtWidgets.QMessageBox.information(None,"成功","保存成功")
+        
+    def get_packet_data_for_export(self):
+        """提取数据包表格中的数据用于导出"""
+        packet_data = []
+        headers = []
+        visible_col_indices = []
+        
+        # 获取数据包表头和可见列索引
+        for col in range(self.tableWidget.columnCount()):
+            if not self.tableWidget.isColumnHidden(col):
+                header_item = self.tableWidget.horizontalHeaderItem(col)
+                if header_item is not None:
+                    headers.append(header_item.text())
+                    visible_col_indices.append(col)
+        
+        # 获取所有数据包数据
+        for row in range(self.tableWidget.rowCount()):
+            row_data = {}
+            for i, col in enumerate(visible_col_indices):
+                item = self.tableWidget.item(row, col)
+                if item is not None:
+                    row_data[headers[i]] = item.text()
+                else:
+                    row_data[headers[i]] = ""
+            packet_data.append(row_data)
+            
+        return packet_data, headers
+    
+    def get_attack_data_for_export(self):
+        """提取攻击信息表格中的数据用于导出"""
+        attack_data = []
+        headers = []
+        visible_col_indices = []
+        
+        # 获取攻击信息表头
+        for col in range(self.tableWidgetAttackInfo.columnCount()):
+            header_item = self.tableWidgetAttackInfo.horizontalHeaderItem(col)
+            if header_item is not None:
+                headers.append(header_item.text())
+                visible_col_indices.append(col)
+        
+        # 获取所有攻击信息数据
+        for row in range(self.tableWidgetAttackInfo.rowCount()):
+            row_data = {}
+            for i, col in enumerate(visible_col_indices):
+                item = self.tableWidgetAttackInfo.item(row, col)
+                if item is not None:
+                    row_data[headers[i]] = item.text()
+                else:
+                    row_data[headers[i]] = ""
+            attack_data.append(row_data)
+            
+        return attack_data, headers
+            
+    def exportToCSV(self):
+        """导出数据包和攻击信息到CSV文件"""
+        # 询问用户保存报告的目录
+        export_dir = QFileDialog.getExistingDirectory(self, "选择导出目录", "./")
+        if not export_dir:
+            return
+            
+        timestamp = time.strftime("%Y%m%d_%H%M%S")
+        
+        try:
+            # 导出数据包数据
+            packet_data, packet_headers = self.get_packet_data_for_export()
+            if packet_data:
+                packet_csv_path = os.path.join(export_dir, f"packet_report_{timestamp}.csv")
+                with open(packet_csv_path, 'w', newline='', encoding='utf-8') as f:
+                    writer = csv.DictWriter(f, fieldnames=packet_headers)
+                    writer.writeheader()
+                    writer.writerows(packet_data)
+            
+            # 导出攻击数据
+            attack_data, attack_headers = self.get_attack_data_for_export()
+            if attack_data:
+                attack_csv_path = os.path.join(export_dir, f"attack_report_{timestamp}.csv")
+                with open(attack_csv_path, 'w', newline='', encoding='utf-8') as f:
+                    writer = csv.DictWriter(f, fieldnames=attack_headers)
+                    writer.writeheader()
+                    writer.writerows(attack_data)
+            
+            QMessageBox.information(self, "导出成功", f"报告已成功导出到:\n{export_dir}")
+        except Exception as e:
+            QMessageBox.critical(self, "导出失败", f"导出报告时发生错误:\n{str(e)}")
+    
+    def exportToHTML(self):
+        """导出数据包和攻击信息到HTML报告"""
+        # 询问用户保存报告的目录
+        export_dir = QFileDialog.getExistingDirectory(self, "选择导出目录", "./")
+        if not export_dir:
+            return
+            
+        timestamp = time.strftime("%Y%m%d_%H%M%S")
+        html_path = os.path.join(export_dir, f"network_security_report_{timestamp}.html")
+        
+        try:
+            packet_data, packet_headers = self.get_packet_data_for_export()
+            attack_data, attack_headers = self.get_attack_data_for_export()
+            
+            # 创建HTML内容
+            html_content = f"""
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="UTF-8">
+                <title>网络安全分析报告</title>
+                <style>
+                    body {{ font-family: Arial, sans-serif; margin: 20px; }}
+                    h1, h2 {{ color: #2c3e50; }}
+                    table {{ border-collapse: collapse; width: 100%; margin-bottom: 20px; }}
+                    th, td {{ border: 1px solid #ddd; padding: 8px; text-align: left; }}
+                    th {{ background-color: #f2f2f2; }}
+                    tr:nth-child(even) {{ background-color: #f9f9f9; }}
+                    .timestamp {{ color: #7f8c8d; font-size: 14px; }}
+                    .alert {{ color: #e74c3c; }}
+                </style>
+            </head>
+            <body>
+                <h1>网络安全分析报告</h1>
+                <p class="timestamp">生成时间: {time.strftime("%Y-%m-%d %H:%M:%S")}</p>
+            """
+            
+            # 添加数据包表格
+            if packet_data:
+                html_content += """                
+                <h2>捕获的数据包</h2>
+                <table>
+                    <tr>
+                """
+                
+                # 添加表头
+                for header in packet_headers:
+                    html_content += f"<th>{header}</th>\n"
+                html_content += "</tr>\n"
+                
+                # 添加数据行
+                for item in packet_data:
+                    html_content += "<tr>\n"
+                    for header in packet_headers:
+                        # 使用get方法确保即使没有键也不会出错
+                        cell_content = item.get(header, '')
+                        # 如果内容过长，进行限制
+                        if len(str(cell_content)) > 100:
+                            cell_content = str(cell_content)[:97] + '...'
+                        html_content += f"<td>{cell_content}</td>\n"
+                    html_content += "</tr>\n"
+                
+                html_content += "</table>\n"
+            
+            # 添加攻击数据表格
+            if attack_data:
+                html_content += """                
+                <h2 class="alert">检测到的攻击</h2>
+                <table>
+                    <tr>
+                """
+                
+                # 添加表头
+                for header in attack_headers:
+                    html_content += f"<th>{header}</th>\n"
+                html_content += "</tr>\n"
+                
+                # 添加数据行
+                for attack in attack_data:
+                    html_content += "<tr>\n"
+                    for header in attack_headers:
+                        # 使用get方法确保即使没有键也不会出错
+                        cell_content = attack.get(header, '')
+                        # 如果内容过长，进行限制
+                        if len(str(cell_content)) > 100:
+                            cell_content = str(cell_content)[:97] + '...'
+                        html_content += f"<td>{cell_content}</td>\n"
+                    html_content += "</tr>\n"
+                
+                html_content += "</table>\n"
+            
+            # 添加摘要信息
+            num_packets = len(packet_data)
+            num_attacks = len(attack_data)
+            html_content += f"""
+                <h2>摘要</h2>
+                <ul>
+                    <li>总共捕获数据包: <strong>{num_packets}</strong></li>
+                    <li>检测到攻击: <strong>{num_attacks}</strong></li>
+                </ul>
+            </body>
+            </html>
+            """
+            
+            # 写入HTML文件
+            with open(html_path, 'w', encoding='utf-8') as f:
+                f.write(html_content)
+            
+            # 尝试在浏览器中打开
+            try:
+                webbrowser.open('file://' + os.path.realpath(html_path))
+                QMessageBox.information(self, "导出成功", f"HTML报告已成功导出到:\n{html_path}")
+            except:
+                QMessageBox.information(self, "导出成功", f"HTML报告已成功导出到:\n{html_path}，但无法自动打开，请手动查看。")
+            
+        except Exception as e:
+            QMessageBox.critical(self, "导出失败", f"导出HTML报告时发生错误:\n{str(e)}")
+            
+    def exportToFullReport(self):
+        """导出完整的PDF报告，包含数据包和攻击信息"""
+        try:
+            # 询问用户文件保存位置
+            path, _ = QFileDialog.getSaveFileName(self, "保存PDF报告", f"./security_report_{time.strftime('%Y%m%d_%H%M%S')}.pdf", "PDF Files (*.pdf)")
+            if not path:
+                return
+            
+            packet_data, packet_headers = self.get_packet_data_for_export()
+            attack_data, attack_headers = self.get_attack_data_for_export()
+            
+            # 先生成一个HTML的中间文件
+            html_path = path.replace('.pdf', '.html')
+            
+            # 创建HTML内容
+            html_content = f"""
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="UTF-8">
+                <title>网络安全分析报告</title>
+                <style>
+                    body {{ font-family: Arial, sans-serif; margin: 20px; }}
+                    h1, h2 {{ color: #2c3e50; }}
+                    table {{ border-collapse: collapse; width: 100%; margin-bottom: 20px; }}
+                    th, td {{ border: 1px solid #ddd; padding: 8px; text-align: left; }}
+                    th {{ background-color: #f2f2f2; }}
+                    tr:nth-child(even) {{ background-color: #f9f9f9; }}
+                    .timestamp {{ color: #7f8c8d; font-size: 14px; }}
+                    .alert {{ color: #e74c3c; }}
+                </style>
+            </head>
+            <body>
+                <h1>网络安全分析报告</h1>
+                <p clawkhtmltopdfss="timestamp">生成时间: {time.strftime("%Y-%m-%d %H:%M:%S")}</p>
+                
+                <h2>摘要</h2>
+                <ul>
+                    <li>总共捕获数据包: <strong>{len(packet_data)}</strong></li>
+                    <li>检测到攻击: <strong>{len(attack_data)}</strong></li>
+                </ul>
+            """
+            
+            # 添加攻击数据表格
+            if attack_data:
+                html_content += """
+                <h2 class="alert">检测到的攻击</h2>
+                <table>
+                    <tr>
+                """
+                
+                # 限制列数以保持表格宽度合理
+                visible_attack_headers = attack_headers
+                
+                # 添加表头
+                for header in visible_attack_headers:
+                    html_content += f"<th>{header}</th>\n"
+                html_content += "</tr>\n"
+                
+                # 添加数据行
+                for attack in attack_data:
+                    html_content += "<tr>\n"
+                    for header in visible_attack_headers:
+                        cell_content = attack.get(header, '')
+                        if len(str(cell_content)) > 100:  # 限制内容长度
+                            cell_content = str(cell_content)[:97] + '...'
+                        html_content += f"<td>{cell_content}</td>\n"
+                    html_content += "</tr>\n"
+                
+                html_content += "</table>\n"
+            
+            # 添加数据包数据表格
+            if packet_data:
+                html_content += """
+                <h2>捕获的数据包</h2>
+                """
+                
+                # 限制显示数量以保持报告大小合理
+                sample_size = min(50, len(packet_data))
+                html_content += f"<p>显示前 {sample_size} 个数据包 (共 {len(packet_data)} 个)</p>\n"
+                
+                html_content += "<table>\n<tr>\n"
+                
+                # 添加表头
+                visible_headers = packet_headers[:8] if len(packet_headers) > 8 else packet_headers
+                for header in visible_headers:
+                    html_content += f"<th>{header}</th>\n"
+                html_content += "</tr>\n"
+                
+                # 添加数据行
+                for i, packet in enumerate(packet_data):
+                    if i >= sample_size:
+                        break
+                    html_content += "<tr>\n"
+                    for header in visible_headers:
+                        cell_content = packet.get(header, '')
+                        if len(str(cell_content)) > 100:
+                            cell_content = str(cell_content)[:97] + '...'
+                        html_content += f"<td>{cell_content}</td>\n"
+                    html_content += "</tr>\n"
+                
+                html_content += "</table>\n"
+            
+            # 添加页脚
+            html_content += """
+            </body>
+            </html>
+            """
+            
+            # 先将HTML内容写入临时文件
+            with open(html_path, 'w', encoding='utf-8') as f:
+                f.write(html_content)
+            
+            # 判断是否已安装wkhtmltopdf
+            try:
+                import subprocess
+                # 使用wkhtmltopdf将HTML转换为PDF
+                result = subprocess.run(['wkhtmltopdf', html_path, path], capture_output=True, text=True)
+                
+                if result.returncode != 0:
+                    # 如果wkhtmltopdf不可用，则使用更简单的方法 - 直接将HTML保存为报告
+                    QMessageBox.warning(self, "导出提示", f"PDF转换工具不可用，已将报告以HTML格式导出: {html_path}")
+                    
+                    # 尝试在浏览器中打开HTML报告
+                    webbrowser.open('file://' + os.path.realpath(html_path))
+                    
+                else:
+                    # 如果PDF生成成功，删除临时HTML文件
+                    os.remove(html_path)
+                    QMessageBox.information(self, "导出成功", f"PDF报告已成功导出到:\n{path}")
+                
+            except Exception as e:
+                # 如果使用wkhtmltopdf出错，则保留HTML文件
+                QMessageBox.warning(self, "导出提示", f"PDF转换失败，报告以HTML格式导出: {html_path}\n错误: {str(e)}")
+                # 尝试在浏览器中打开HTML报告
+                webbrowser.open('file://' + os.path.realpath(html_path))
+                
+        except Exception as e:
+            QMessageBox.critical(self, "导出失败", f"导出报告时发生错误:\n{str(e)}")
 
     #右键点击显示菜单
     def showContextMenu(self,pos):
@@ -1957,7 +2330,7 @@ class SnifferMainWindow(Ui_MainWindow,QtWidgets.QMainWindow):
             self.textBrowserRaw.append('Padding：%s' % padding_data)
             
             # Check if any loaded rules match the padding data
-            self.check_rules_in_data(padding_data)
+            self.check_rules_in_data(padding_data, packet)
 
 
         self.textBrowserDump.clear()

@@ -181,6 +181,8 @@ class Ui_MainWindow(object):
         self.menuCapture.setObjectName("menuCapture")
         self.menuAnalyze = QtWidgets.QMenu(self.menubar)
         self.menuAnalyze.setObjectName("menuAnalyze")
+        self.menuExport = QtWidgets.QMenu(self.menubar)
+        self.menuExport.setObjectName("menuExport")
         self.menuAbout = QtWidgets.QMenu(self.menubar)
         self.menuAbout.setObjectName("menuAbout")
         MainWindow.setMenuBar(self.menubar)
@@ -200,6 +202,14 @@ class Ui_MainWindow(object):
         self.actionStatic.setObjectName("actionStatic")
         self.actionDDOS = QtWidgets.QAction(MainWindow)
         self.actionDDOS.setObjectName("actionDDOS")
+        
+        # Export actions
+        self.actionExportCSV = QtWidgets.QAction(MainWindow)
+        self.actionExportCSV.setObjectName("actionExportCSV")
+        self.actionExportHTML = QtWidgets.QAction(MainWindow)
+        self.actionExportHTML.setObjectName("actionExportHTML")
+        self.actionExportPDF = QtWidgets.QAction(MainWindow)
+        self.actionExportPDF.setObjectName("actionExportPDF")
         self.actionUnencrypted_infomation = QtWidgets.QAction(MainWindow)
         self.actionUnencrypted_infomation.setObjectName("actionUnencrypted_infomation")
         self.actionFork_bomb = QtWidgets.QAction(MainWindow)
@@ -216,11 +226,19 @@ class Ui_MainWindow(object):
         self.menuCapture.addAction(self.actionFrom_interface)
         self.menuCapture.addAction(self.actionFilter)
         self.menuAnalyze.addAction(self.actionStatic)
+        self.menuAnalyze.addAction(self.actionDDOS)
+        
+        # Add export actions to Export menu
+        self.menuExport.addAction(self.actionExportCSV)
+        self.menuExport.addAction(self.actionExportHTML)
+        self.menuExport.addAction(self.actionExportPDF)
+        
+        # Add all menus to the menubar
         self.menubar.addAction(self.menuasd.menuAction())
         self.menubar.addAction(self.menuCapture.menuAction())
         self.menubar.addAction(self.menuAnalyze.menuAction())
+        self.menubar.addAction(self.menuExport.menuAction())
         self.menubar.addAction(self.menuAbout.menuAction())
-
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
@@ -280,6 +298,12 @@ class Ui_MainWindow(object):
         self.actionFilter.setText(_translate("MainWindow", "Filter"))
         self.actionStatic.setText(_translate("MainWindow", "Static"))
         self.actionDDOS.setText(_translate("MainWindow", "DDOS"))
+        
+        # Set text for export actions
+        self.menuExport.setTitle(_translate("MainWindow", "Export"))
+        self.actionExportCSV.setText(_translate("MainWindow", "Export to CSV"))
+        self.actionExportHTML.setText(_translate("MainWindow", "Export to HTML"))
+        self.actionExportPDF.setText(_translate("MainWindow", "Export to PDF"))
         self.actionUnencrypted_infomation.setText(_translate("MainWindow", "Unencrypted infomation"))
         self.actionFork_bomb.setText(_translate("MainWindow", "Fork bomb"))
         self.actionNmap.setText(_translate("MainWindow", "Nmap"))
